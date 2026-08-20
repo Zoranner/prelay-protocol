@@ -1,0 +1,9 @@
+/target/
+/Cargo.lock
+
+.idea/
+.vscode/settings.json
+*.swp
+
+docs/protocol/environments/*.local.bru
+docs/protocol/environments/*.private.bru
