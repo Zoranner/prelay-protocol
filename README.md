@@ -16,7 +16,7 @@ prelay-protocol = { path = "../crates/protocol" }
 
 ## 协议材料
 
-`docs/protocol/` 保存 Bruno 请求集合与无密钥环境模板。模板只能包含占位符，不得提交设备凭据、Interface Token 或 Provider API Key。
+`docs/protocol/` 保存 Bruno 请求集合与无密钥环境模板。模板只能包含占位符，不得提交设备凭据、Endpoint Token 或 Provider API Key。
 
 ## 验证
 

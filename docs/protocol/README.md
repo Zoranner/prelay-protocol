@@ -8,4 +8,4 @@
 
 本地文件位于客户端应用数据目录的 `Prelay/device-credential.json`。它不使用 Windows Credential Manager、系统 Keychain 或加密 vault，适用于内网桌面客户端的本地使用边界。Nuxt 运行时、管理 API 响应和 Bruno 集合都不应接收或保存真实 Provider API Key。
 
-AI 工具使用根路径下的 `/v1/models`、`/v1/responses`、`/v1/chat/completions` 和 `/v1/messages`，通过 Interface Token 认证；`/proxy` 已移除。
+AI 工具使用根路径下的 `/v1/models`、`/v1/responses`、`/v1/chat/completions` 和 `/v1/messages`，通过 Endpoint Token 认证；`/proxy` 已移除。

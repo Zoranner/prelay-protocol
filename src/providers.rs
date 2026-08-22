@@ -56,6 +56,7 @@ pub struct ProviderResponse {
     pub name: String,
     pub provider_type: String,
     pub base_url: String,
+    pub api_key: String,
     pub api_key_masked: String,
     pub capabilities: ProviderCapabilityOverrides,
     pub upstream_protocols: Vec<String>,
@@ -66,6 +67,15 @@ pub struct ProviderResponse {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TestProviderProtocolRequest {
     pub protocol: String,
+    pub model: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderOperationRequest {
+    pub provider_type: String,
+    pub base_url: String,
+    pub api_key: String,
+    pub protocol: Option<String>,
     pub model: Option<String>,
 }
 

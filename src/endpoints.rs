@@ -1,36 +1,36 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct InterfaceModelInput {
+pub struct EndpointModelInput {
     pub provider_id: String,
     pub upstream_model: String,
     pub model_name: Option<String>,
 }
 
-impl InterfaceModelInput {
+impl EndpointModelInput {
     pub fn default_model_name(upstream_model: &str) -> String {
         upstream_model.to_string()
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CreateInterfaceRequest {
+pub struct CreateEndpointRequest {
     pub name: String,
     pub protocol: Option<String>,
-    pub models: Vec<InterfaceModelInput>,
+    pub models: Vec<EndpointModelInput>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
-pub struct UpdateInterfaceRequest {
+pub struct UpdateEndpointRequest {
     pub name: Option<String>,
     pub protocol: Option<String>,
-    pub models: Option<Vec<InterfaceModelInput>>,
+    pub models: Option<Vec<EndpointModelInput>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct InterfaceModelResponse {
+pub struct EndpointModelResponse {
     pub id: String,
-    pub interface_id: String,
+    pub endpoint_id: String,
     pub model_name: String,
     pub provider_id: String,
     pub upstream_model: String,
@@ -38,11 +38,11 @@ pub struct InterfaceModelResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct InterfaceResponse {
+pub struct EndpointResponse {
     pub id: String,
     pub name: String,
     pub protocol: String,
     pub token: String,
-    pub models: Vec<InterfaceModelResponse>,
+    pub models: Vec<EndpointModelResponse>,
     pub created_at: String,
 }

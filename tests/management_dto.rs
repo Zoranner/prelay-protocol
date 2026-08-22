@@ -1,13 +1,16 @@
 use std::fmt::Debug;
 
 use prelay_protocol::{
-    interfaces::{InterfaceModelResponse, UpdateInterfaceRequest},
+    endpoints::{EndpointModelResponse, UpdateEndpointRequest},
     providers::ProviderModelResponse,
-    stats::{ModelStatsSummary, ProviderStatsSummary, RequestLogSummary, StatsOverview},
+    stats::{
+        ModelStatsSummary, ProviderStatsSummary, RequestLogSummary, StatsOverview,
+        TokenUsageTimelinePoint,
+    },
 };
 use prelay_protocol::{
-    CreateIdentityRequest, CreateIdentityResponse, CreateInterfaceRequest, CreateProviderRequest,
-    InterfaceModelInput, InterfaceResponse, ProtocolErrorCode, ProviderCapabilityOverrides,
+    CreateEndpointRequest, CreateIdentityRequest, CreateIdentityResponse, CreateProviderRequest,
+    EndpointModelInput, EndpointResponse, ProtocolErrorCode, ProviderCapabilityOverrides,
     ProviderOperationResponse, ProviderProtocolBaseUrls, ProviderResponse, RotateCredentialRequest,
     RotateCredentialResponse, TestProviderProtocolRequest, UpdateProviderRequest,
 };
@@ -54,32 +57,32 @@ fn management_requests_round_trip_without_client_identity_id() {
         capabilities: Some(capabilities()),
         ..Default::default()
     };
-    let interface = CreateInterfaceRequest {
+    let endpoint = CreateEndpointRequest {
         name: "OpenAI tools".into(),
         protocol: Some("openai".into()),
-        models: vec![InterfaceModelInput {
+        models: vec![EndpointModelInput {
             provider_id: "provider-a".into(),
             upstream_model: "deepseek-chat".into(),
             model_name: Some("assistant".into()),
         }],
     };
-    let interface_update = UpdateInterfaceRequest {
+    let endpoint_update = UpdateEndpointRequest {
         name: Some("OpenAI tools production".into()),
         protocol: Some("responses".into()),
-        models: Some(vec![InterfaceModelInput {
+        models: Some(vec![EndpointModelInput {
             provider_id: "provider-a".into(),
             upstream_model: "deepseek-reasoner".into(),
             model_name: Some("reasoner".into()),
         }]),
     };
-    let empty_interface_update = UpdateInterfaceRequest::default();
+    let empty_endpoint_update = UpdateEndpointRequest::default();
 
     assert_json_round_trip(register.clone());
     assert_json_round_trip(provider.clone());
     assert_json_round_trip(update.clone());
-    assert_json_round_trip(interface);
-    assert_json_round_trip(interface_update);
-    assert_json_round_trip(empty_interface_update.clone());
+    assert_json_round_trip(endpoint);
+    assert_json_round_trip(endpoint_update);
+    assert_json_round_trip(empty_endpoint_update.clone());
 
     assert!(serde_json::to_value(register)
         .unwrap()
@@ -97,18 +100,18 @@ fn management_requests_round_trip_without_client_identity_id() {
         serde_json::to_value(update).unwrap()["api_key"],
         serde_json::Value::Null
     );
-    let empty_interface_update_json = serde_json::to_value(empty_interface_update).unwrap();
-    assert_eq!(empty_interface_update_json["name"], serde_json::Value::Null);
+    let empty_endpoint_update_json = serde_json::to_value(empty_endpoint_update).unwrap();
+    assert_eq!(empty_endpoint_update_json["name"], serde_json::Value::Null);
     assert_eq!(
-        empty_interface_update_json["protocol"],
+        empty_endpoint_update_json["protocol"],
         serde_json::Value::Null
     );
     assert_eq!(
-        empty_interface_update_json["models"],
+        empty_endpoint_update_json["models"],
         serde_json::Value::Null
     );
     assert_eq!(
-        InterfaceModelInput::default_model_name("upstream"),
+        EndpointModelInput::default_model_name("upstream"),
         "upstream"
     );
 }
@@ -128,6 +131,7 @@ fn management_responses_and_stats_round_trip() {
         name: "DeepSeek".into(),
         provider_type: "openai_compatible".into(),
         base_url: "https://api.deepseek.com".into(),
+        api_key: "sk-test".into(),
         api_key_masked: "sk-t...test".into(),
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into(), "anthropic".into()],
@@ -139,14 +143,14 @@ fn management_responses_and_stats_round_trip() {
         }],
         created_at: "2026-08-13T00:00:00Z".into(),
     });
-    assert_json_round_trip(InterfaceResponse {
-        id: "interface-a".into(),
+    assert_json_round_trip(EndpointResponse {
+        id: "endpoint-a".into(),
         name: "OpenAI tools".into(),
         protocol: "openai".into(),
-        token: "interface-token".into(),
-        models: vec![InterfaceModelResponse {
-            id: "interface-model-a".into(),
-            interface_id: "interface-a".into(),
+        token: "endpoint-token".into(),
+        models: vec![EndpointModelResponse {
+            id: "endpoint-model-a".into(),
+            endpoint_id: "endpoint-a".into(),
             model_name: "assistant".into(),
             provider_id: "provider-a".into(),
             upstream_model: "deepseek-chat".into(),
@@ -160,12 +164,23 @@ fn management_responses_and_stats_round_trip() {
         failed_requests: 2,
         input_tokens: 123,
         output_tokens: 456,
+        cache_read_tokens: 8,
+        cache_write_tokens: 9,
+        average_latency_ms: Some(789),
+    });
+    assert_json_round_trip(TokenUsageTimelinePoint {
+        bucket: "2026-08-22".into(),
+        input_tokens: 123,
+        output_tokens: 456,
+        cache_read_tokens: 78,
+        cache_write_tokens: 9,
     });
     assert_json_round_trip(RequestLogSummary {
         id: "request-a".into(),
         created_at: "2026-08-13T00:00:00Z".into(),
         protocol_in: Some("responses".into()),
         protocol_upstream: None,
+        endpoint_name: Some("生产接入点".into()),
         provider_name: Some("DeepSeek".into()),
         model_requested: Some("assistant".into()),
         status: "success".into(),
@@ -174,6 +189,10 @@ fn management_responses_and_stats_round_trip() {
         error_message: None,
         input_tokens: Some(123),
         output_tokens: Some(456),
+        is_streaming: Some(true),
+        first_token_ms: Some(120),
+        cache_read_tokens: Some(32),
+        cache_write_tokens: Some(16),
         latency_ms: Some(789),
         upstream_request_id: None,
         metadata_json: None,
