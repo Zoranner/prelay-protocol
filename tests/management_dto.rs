@@ -163,6 +163,7 @@ fn management_responses_and_stats_round_trip() {
         successful_requests: 10,
         failed_requests: 2,
         input_tokens: 123,
+        total_input_tokens: 140,
         output_tokens: 456,
         cache_read_tokens: 8,
         cache_write_tokens: 9,
@@ -171,6 +172,7 @@ fn management_responses_and_stats_round_trip() {
     assert_json_round_trip(TokenUsageTimelinePoint {
         bucket: "2026-08-22".into(),
         input_tokens: 123,
+        total_input_tokens: 140,
         output_tokens: 456,
         cache_read_tokens: 78,
         cache_write_tokens: 9,

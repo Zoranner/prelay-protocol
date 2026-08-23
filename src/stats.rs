@@ -6,6 +6,7 @@ pub struct StatsOverview {
     pub successful_requests: i64,
     pub failed_requests: i64,
     pub input_tokens: i64,
+    pub total_input_tokens: i64,
     pub output_tokens: i64,
     pub cache_read_tokens: i64,
     pub cache_write_tokens: i64,
@@ -16,6 +17,7 @@ pub struct StatsOverview {
 pub struct TokenUsageTimelinePoint {
     pub bucket: String,
     pub input_tokens: i64,
+    pub total_input_tokens: i64,
     pub output_tokens: i64,
     pub cache_read_tokens: i64,
     pub cache_write_tokens: i64,
