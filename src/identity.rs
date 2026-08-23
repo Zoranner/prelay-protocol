@@ -8,6 +8,7 @@ pub struct CreateIdentityRequest {
     pub machine_id: String,
     pub account_sid: String,
     pub credential: String,
+    pub display_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

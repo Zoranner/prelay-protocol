@@ -43,6 +43,7 @@ fn management_requests_round_trip_without_client_identity_id() {
         machine_id: "machine-a".into(),
         account_sid: "S-1-5-21-100".into(),
         credential: "client-generated-credential".into(),
+        display_name: Some("Ada Lovelace".into()),
     };
     let provider = CreateProviderRequest {
         name: "DeepSeek".into(),
@@ -229,6 +230,7 @@ fn identity_credential_dtos_round_trip_without_server_issued_secret() {
         machine_id: "machine-a".into(),
         account_sid: "S-1-5-21-100".into(),
         credential: "client-generated-credential".into(),
+        display_name: None,
     };
     let rotate = RotateCredentialRequest {
         new_credential: "next-client-credential".into(),
