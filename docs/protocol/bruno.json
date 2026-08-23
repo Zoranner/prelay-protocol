@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "Prelay Protocol",
+  "name": "Prelay 协议请求",
   "type": "collection",
   "ignore": [
     ".git",

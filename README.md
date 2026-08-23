@@ -1,22 +1,22 @@
 # prelay-protocol
 
-`prelay-protocol` 定义 Prelay 服务端与桌面客户端之间共享的管理 API 数据传输对象和稳定错误码。它不包含 HTTP 路由、身份认证、数据库、凭据存储、供应商适配或协议桥接实现。
+`prelay-protocol` 是 Prelay 管理 API 数据传输对象、稳定错误码和协议材料的唯一来源。它不包含 HTTP 路由、身份认证、数据库、凭据存储、供应商适配或协议桥接实现。
 
-crate 元数据版本为 `0.1.0`，采用 Rust 2021 edition。crate 包名为 `prelay-protocol`，Rust 代码中的导入名为 `prelay_protocol`。
+crate 包名为 `prelay-protocol`，Rust 导入名为 `prelay_protocol`，采用 Rust 2021 edition。
 
-## 依赖
+## 使用方
 
-`prelay-server` 和 `prelay-client` 都将本仓作为各自 `crates/protocol` 目录的 Git submodule。两个父仓的 Rust manifest 使用相同的相对路径依赖：
+`prelay-server` 和 `prelay-client` 都通过各自的 `crates/protocol` Git submodule 引用本仓；管理 DTO 或错误码变更必须先在此处完成，再更新两个父仓的 submodule 指针和调用方。
 
 ```toml
 prelay-protocol = { path = "../crates/protocol" }
 ```
 
-上例分别适用于 `prelay-server/server/Cargo.toml` 和 `prelay-client/src-tauri/Cargo.toml`；二者到各自 `crates/protocol` submodule 的相对路径均为 `../crates/protocol`。父仓只通过各自的 submodule 引用本 crate。
-
 ## 协议材料
 
-`docs/protocol/` 保存 Bruno 请求集合与无密钥环境模板。模板只能包含占位符，不得提交设备凭据、Endpoint Token 或 Provider API Key。
+[docs/protocol/](docs/protocol/) 是唯一的 Bruno 请求集合，按身份、供应商、接入点和统计资源组织，根目录保存四个 `/v1` 调用入口。每个请求的路径、方法、鉴权和示例正文应与本 crate DTO 及服务端路由一致。
+
+`environments/template.bru` 只包含本地示例与占位符。复制后填写实际地址和凭据，个人环境及真实设备凭据、Endpoint Token、Provider API Key 均不得提交。
 
 ## 验证
 
