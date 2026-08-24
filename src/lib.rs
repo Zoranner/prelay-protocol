@@ -1,9 +1,11 @@
+pub mod client_update;
 pub mod endpoints;
 pub mod error;
 pub mod identity;
 pub mod providers;
 pub mod stats;
 
+pub use client_update::ClientUpdateResponse;
 pub use endpoints::{
     CreateEndpointRequest, EndpointModelInput, EndpointModelResponse, EndpointResponse,
     UpdateEndpointRequest,

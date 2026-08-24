@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "snake_case")]
 pub enum ProtocolErrorCode {
     IdentityAlreadyRegistered,
+    ClientUpdateUnavailable,
     InvalidCredential,
     NotFound,
     ValidationFailed,
@@ -14,6 +15,7 @@ impl ProtocolErrorCode {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::IdentityAlreadyRegistered => "identity_already_registered",
+            Self::ClientUpdateUnavailable => "client_update_unavailable",
             Self::InvalidCredential => "invalid_credential",
             Self::NotFound => "not_found",
             Self::ValidationFailed => "validation_failed",
