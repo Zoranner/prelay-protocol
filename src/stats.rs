@@ -32,6 +32,7 @@ pub struct RequestLogSummary {
     pub endpoint_name: Option<String>,
     pub provider_name: Option<String>,
     pub model_requested: Option<String>,
+    pub model_upstream: Option<String>,
     pub status: String,
     pub http_status: Option<i64>,
     pub error_code: Option<String>,

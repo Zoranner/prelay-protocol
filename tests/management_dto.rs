@@ -186,6 +186,7 @@ fn management_responses_and_stats_round_trip() {
         endpoint_name: Some("生产接入点".into()),
         provider_name: Some("DeepSeek".into()),
         model_requested: Some("assistant".into()),
+        model_upstream: Some("deepseek-chat".into()),
         status: "success".into(),
         http_status: Some(200),
         error_code: None,
