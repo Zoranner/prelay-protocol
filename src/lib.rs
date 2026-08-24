@@ -5,7 +5,7 @@ pub mod identity;
 pub mod providers;
 pub mod stats;
 
-pub use client_update::ClientUpdateResponse;
+pub use client_update::{ClientUpdateResponse, ClientUpdateTarget};
 pub use endpoints::{
     CreateEndpointRequest, EndpointModelInput, EndpointModelResponse, EndpointResponse,
     UpdateEndpointRequest,
