@@ -1,0 +1,15 @@
+meta {
+  name: 下载客户端安装包
+  type: http
+  seq: 31
+}
+
+get {
+  url: {{relay_url}}/api/client-update/download
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: <device-credential>
+}

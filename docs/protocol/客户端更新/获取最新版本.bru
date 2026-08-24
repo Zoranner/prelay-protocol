@@ -1,0 +1,15 @@
+meta {
+  name: 获取最新客户端版本
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{relay_url}}/api/client-update
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: <device-credential>
+}
