@@ -1,0 +1,28 @@
+meta {
+  name: 创建图像
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{relay_url}}/v1/images/generations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: <endpoint-token>
+}
+
+body:json {
+  {
+    "model": "<endpoint-model-name>",
+    "prompt": "一只小狗",
+    "size": "1024x1024",
+    "quality": "standard",
+    "output_format": "png",
+    "response_format": "b64_json",
+    "stream": true,
+    "partial_images": 2
+  }
+}

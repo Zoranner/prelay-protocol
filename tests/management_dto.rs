@@ -26,11 +26,11 @@ where
 
 fn capabilities() -> ProviderCapabilityOverrides {
     ProviderCapabilityOverrides {
-        upstream_protocols: Some(vec!["openai".into(), "anthropic".into()]),
+        upstream_protocols: Some(vec!["openai".into(), "images_generations".into()]),
         protocol_base_urls: Some(ProviderProtocolBaseUrls {
-            responses: None,
-            openai: Some("https://api.deepseek.com/v1".into()),
-            anthropic: None,
+            openai: Some("https://api.example/v1".into()),
+            images_generations: Some("https://images.example/v1".into()),
+            ..Default::default()
         }),
         tool_calls: Some(true),
         ..Default::default()
@@ -94,8 +94,9 @@ fn management_requests_round_trip_without_client_identity_id() {
         .get("identity_id")
         .is_none());
     assert_eq!(
-        serde_json::to_value(provider).unwrap()["capabilities"]["protocol_base_urls"]["openai"],
-        "https://api.deepseek.com/v1"
+        serde_json::to_value(provider).unwrap()["capabilities"]["protocol_base_urls"]
+            ["images_generations"],
+        "https://images.example/v1"
     );
     assert_eq!(
         serde_json::to_value(update).unwrap()["api_key"],

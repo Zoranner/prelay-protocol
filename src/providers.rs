@@ -20,6 +20,7 @@ pub struct ProviderProtocolBaseUrls {
     pub responses: Option<String>,
     pub openai: Option<String>,
     pub anthropic: Option<String>,
+    pub images_generations: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
