@@ -1,6 +1,7 @@
 pub mod client_update;
 pub mod endpoints;
 pub mod error;
+pub mod extensions;
 pub mod identity;
 pub mod providers;
 pub mod stats;
@@ -11,6 +12,9 @@ pub use endpoints::{
     UpdateEndpointRequest,
 };
 pub use error::ProtocolErrorCode;
+pub use extensions::{
+    ExtensionFile, ExtensionInstallBundle, ExtensionKind, ExtensionSummary, ExtensionVersion,
+};
 pub use identity::{
     CreateIdentityRequest, CreateIdentityResponse, RotateCredentialRequest,
     RotateCredentialResponse,
