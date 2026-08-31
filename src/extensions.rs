@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -39,4 +41,33 @@ pub struct ExtensionInstallBundle {
     pub kind: ExtensionKind,
     pub version: ExtensionVersion,
     pub files: Vec<ExtensionFile>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ExtensionMcpManifest {
+    pub name: String,
+    pub transport: ExtensionMcpTransport,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(
+    tag = "type",
+    rename_all = "lowercase",
+    rename_all_fields = "camelCase"
+)]
+pub enum ExtensionMcpTransport {
+    Stdio {
+        command: Vec<String>,
+        cwd: Option<String>,
+        environment: BTreeMap<String, String>,
+        enabled: bool,
+        timeout_ms: Option<u64>,
+    },
+    Http {
+        url: String,
+        headers: BTreeMap<String, String>,
+        enabled: bool,
+        timeout_ms: Option<u64>,
+    },
 }

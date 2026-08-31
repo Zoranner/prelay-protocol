@@ -1,6 +1,8 @@
+use std::collections::BTreeMap;
+
 use prelay_protocol::{
-    ExtensionFile, ExtensionInstallBundle, ExtensionKind, ExtensionSummary, ExtensionVersion,
-    ProtocolErrorCode,
+    ExtensionFile, ExtensionInstallBundle, ExtensionKind, ExtensionMcpManifest,
+    ExtensionMcpTransport, ExtensionSummary, ExtensionVersion, ProtocolErrorCode,
 };
 
 #[test]
@@ -72,5 +74,34 @@ fn extension_error_codes_are_stable() {
     assert_eq!(
         ProtocolErrorCode::ExtensionInstallUnsupported.as_str(),
         "extension_install_unsupported"
+    );
+}
+
+#[test]
+fn mcp_manifest_uses_a_tagged_transport() {
+    let manifest = ExtensionMcpManifest {
+        name: "research".to_string(),
+        transport: ExtensionMcpTransport::Stdio {
+            command: vec!["prelay-research".to_string(), "--stdio".to_string()],
+            cwd: None,
+            environment: BTreeMap::from([("MODE".to_string(), "read-only".to_string())]),
+            enabled: true,
+            timeout_ms: Some(10_000),
+        },
+    };
+
+    assert_eq!(
+        serde_json::to_value(manifest).unwrap(),
+        serde_json::json!({
+            "name": "research",
+            "transport": {
+                "type": "stdio",
+                "command": ["prelay-research", "--stdio"],
+                "cwd": null,
+                "environment": { "MODE": "read-only" },
+                "enabled": true,
+                "timeoutMs": 10_000
+            }
+        })
     );
 }

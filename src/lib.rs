@@ -13,7 +13,8 @@ pub use endpoints::{
 };
 pub use error::ProtocolErrorCode;
 pub use extensions::{
-    ExtensionFile, ExtensionInstallBundle, ExtensionKind, ExtensionSummary, ExtensionVersion,
+    ExtensionFile, ExtensionInstallBundle, ExtensionKind, ExtensionMcpManifest,
+    ExtensionMcpTransport, ExtensionSummary, ExtensionVersion,
 };
 pub use identity::{
     CreateIdentityRequest, CreateIdentityResponse, RotateCredentialRequest,
