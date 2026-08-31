@@ -24,7 +24,7 @@ pub struct TokenUsageTimelinePoint {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct RequestLogSummary {
+pub struct ActivitySummary {
     pub id: String,
     pub created_at: String,
     pub protocol_in: Option<String>,

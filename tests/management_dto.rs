@@ -4,7 +4,7 @@ use prelay_protocol::{
     endpoints::{EndpointModelResponse, UpdateEndpointRequest},
     providers::ProviderModelResponse,
     stats::{
-        ModelStatsSummary, ProviderStatsSummary, RequestLogSummary, StatsOverview,
+        ActivitySummary, ModelStatsSummary, ProviderStatsSummary, StatsOverview,
         TokenUsageTimelinePoint,
     },
 };
@@ -179,8 +179,8 @@ fn management_responses_and_stats_round_trip() {
         cache_read_tokens: 78,
         cache_write_tokens: 9,
     });
-    assert_json_round_trip(RequestLogSummary {
-        id: "request-a".into(),
+    assert_json_round_trip(ActivitySummary {
+        id: "activity-a".into(),
         created_at: "2026-08-13T00:00:00Z".into(),
         protocol_in: Some("responses".into()),
         protocol_upstream: None,

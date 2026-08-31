@@ -25,6 +25,6 @@ pub use providers::{
     ProviderResponse, TestProviderProtocolRequest, UpdateProviderRequest,
 };
 pub use stats::{
-    ModelStatsSummary, ProviderStatsSummary, RequestLogSummary, StatsOverview,
+    ActivitySummary, ModelStatsSummary, ProviderStatsSummary, StatsOverview,
     TokenUsageTimelinePoint,
 };
