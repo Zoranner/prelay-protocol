@@ -200,7 +200,6 @@ fn management_responses_and_stats_round_trip() {
         cache_write_tokens: Some(16),
         latency_ms: Some(789),
         upstream_request_id: None,
-        metadata_json: None,
     });
     assert_json_round_trip(ModelStatsSummary {
         model_requested: Some("assistant".into()),

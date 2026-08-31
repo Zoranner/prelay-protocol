@@ -45,7 +45,6 @@ pub struct ActivitySummary {
     pub cache_write_tokens: Option<i64>,
     pub latency_ms: Option<i64>,
     pub upstream_request_id: Option<String>,
-    pub metadata_json: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
