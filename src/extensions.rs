@@ -31,7 +31,7 @@ pub struct ExtensionSummary {
 #[serde(rename_all = "camelCase")]
 pub struct ExtensionFile {
     pub path: String,
-    pub content: String,
+    pub content_base64: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

@@ -23,7 +23,7 @@ fn extension_catalog_dtos_use_management_api_field_names() {
         version,
         files: vec![ExtensionFile {
             path: "AGENTS.md".to_string(),
-            content: "# Engineering rules".to_string(),
+            content_base64: "IyBFbmdpbmVlcmluZyBydWxlcw==".to_string(),
         }],
     };
 
@@ -51,10 +51,15 @@ fn extension_catalog_dtos_use_management_api_field_names() {
             },
             "files": [{
                 "path": "AGENTS.md",
-                "content": "# Engineering rules"
+                "contentBase64": "IyBFbmdpbmVlcmluZyBydWxlcw=="
             }]
         })
     );
+    assert!(serde_json::from_value::<ExtensionFile>(serde_json::json!({
+        "path": "AGENTS.md",
+        "content": "# Engineering rules"
+    }))
+    .is_err());
 }
 
 #[test]
@@ -74,6 +79,10 @@ fn extension_error_codes_are_stable() {
     assert_eq!(
         ProtocolErrorCode::ExtensionInstallUnsupported.as_str(),
         "extension_install_unsupported"
+    );
+    assert_eq!(
+        ProtocolErrorCode::ExtensionContentInvalid.as_str(),
+        "extension_content_invalid"
     );
 }
 
