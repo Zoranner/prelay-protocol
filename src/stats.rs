@@ -55,7 +55,6 @@ pub struct ModelStatsSummary {
     pub failed_requests: i64,
     pub input_tokens: i64,
     pub output_tokens: i64,
-    pub estimated_cost: Option<f64>,
     pub average_latency_ms: Option<f64>,
 }
 
@@ -68,7 +67,6 @@ pub struct ProviderStatsSummary {
     pub failed_requests: i64,
     pub input_tokens: i64,
     pub output_tokens: i64,
-    pub estimated_cost: Option<f64>,
     pub average_latency_ms: Option<f64>,
     pub average_first_token_ms: Option<f64>,
 }

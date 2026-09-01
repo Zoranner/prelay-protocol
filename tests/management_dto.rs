@@ -201,17 +201,21 @@ fn management_responses_and_stats_round_trip() {
         latency_ms: Some(789),
         upstream_request_id: None,
     });
-    assert_json_round_trip(ModelStatsSummary {
+    let model_stats = ModelStatsSummary {
         model_requested: Some("assistant".into()),
         total_requests: 12,
         successful_requests: 10,
         failed_requests: 2,
         input_tokens: 123,
         output_tokens: 456,
-        estimated_cost: Some(0.12),
         average_latency_ms: Some(789.0),
-    });
-    assert_json_round_trip(ProviderStatsSummary {
+    };
+    assert_json_round_trip(model_stats.clone());
+    assert!(serde_json::to_value(model_stats)
+        .unwrap()
+        .get("estimated_cost")
+        .is_none());
+    let provider_stats = ProviderStatsSummary {
         provider_id: Some("provider-a".into()),
         provider_name: Some("DeepSeek".into()),
         total_requests: 12,
@@ -219,10 +223,14 @@ fn management_responses_and_stats_round_trip() {
         failed_requests: 2,
         input_tokens: 123,
         output_tokens: 456,
-        estimated_cost: Some(0.12),
         average_latency_ms: Some(789.0),
         average_first_token_ms: None,
-    });
+    };
+    assert_json_round_trip(provider_stats.clone());
+    assert!(serde_json::to_value(provider_stats)
+        .unwrap()
+        .get("estimated_cost")
+        .is_none());
 }
 
 #[test]
