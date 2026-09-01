@@ -23,6 +23,26 @@ pub struct TokenUsageTimelinePoint {
     pub cache_write_tokens: i64,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum LeaderboardMetric {
+    Activities,
+    TotalTokens,
+    SuccessfulActivities,
+    SuccessRate,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct UserLeaderboardEntry {
+    pub rank: i64,
+    pub identity_id: String,
+    pub display_name: String,
+    pub activity_count: i64,
+    pub total_tokens: i64,
+    pub successful_activities: i64,
+    pub success_rate: f64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ActivitySummary {
     pub id: String,

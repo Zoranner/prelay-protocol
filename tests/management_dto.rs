@@ -4,8 +4,8 @@ use prelay_protocol::{
     endpoints::{EndpointModelResponse, UpdateEndpointRequest},
     providers::ProviderModelResponse,
     stats::{
-        ActivitySummary, ModelStatsSummary, ProviderStatsSummary, StatsOverview,
-        TokenUsageTimelinePoint,
+        ActivitySummary, LeaderboardMetric, ModelStatsSummary, ProviderStatsSummary, StatsOverview,
+        TokenUsageTimelinePoint, UserLeaderboardEntry,
     },
 };
 use prelay_protocol::{
@@ -231,6 +231,19 @@ fn management_responses_and_stats_round_trip() {
         .unwrap()
         .get("estimated_cost")
         .is_none());
+    assert_eq!(
+        serde_json::to_value(LeaderboardMetric::TotalTokens).unwrap(),
+        "total_tokens"
+    );
+    assert_json_round_trip(UserLeaderboardEntry {
+        rank: 1,
+        identity_id: "identity-a".into(),
+        display_name: "研发一组".into(),
+        activity_count: 12,
+        total_tokens: 5_678,
+        successful_activities: 10,
+        success_rate: 10.0 / 12.0,
+    });
 }
 
 #[test]
