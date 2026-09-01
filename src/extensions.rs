@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 pub enum ExtensionKind {
     Rule,
     Skill,
-    Plugin,
     Mcp,
 }
 
