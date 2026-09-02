@@ -25,13 +25,6 @@ pub enum ProviderAuthScheme {
     Anthropic,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
-pub enum ModelType {
-    Text,
-    Image,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderProtocolBaseUrl {
     pub protocol: ProviderProtocol,
@@ -39,12 +32,58 @@ pub struct ProviderProtocolBaseUrl {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CatalogModelResponse {
+pub struct CatalogLanguageModelResponse {
     pub id: String,
     pub display_name: String,
-    pub model_type: ModelType,
-    pub reasoning_efforts: Vec<String>,
+    pub description: Option<String>,
+    pub reasoning_efforts: Option<Vec<String>>,
     pub default_reasoning_effort: Option<String>,
+    pub context_window: Option<u64>,
+    pub max_context_window: Option<u64>,
+    pub effective_context_window_percent: Option<u8>,
+    pub input_modalities: Option<Vec<String>>,
+    pub supports_parallel_tool_calls: Option<bool>,
+    pub supports_reasoning_summaries: Option<bool>,
+    pub supports_image_detail_original: Option<bool>,
+    pub support_verbosity: Option<bool>,
+    pub default_verbosity: Option<String>,
+    pub apply_patch_tool_type: Option<String>,
+    pub web_search_tool_type: Option<String>,
+    pub truncation_policy: Option<CatalogTruncationPolicyResponse>,
+    pub reasoning_summary_format: Option<String>,
+    pub default_reasoning_summary: Option<String>,
+    pub shell_type: Option<String>,
+    pub visibility: Option<String>,
+    pub supported_in_api: Option<bool>,
+    pub priority: Option<u32>,
+    pub base_instructions: Option<String>,
+    pub experimental_supported_tools: Option<Vec<String>>,
+    pub minimal_client_version: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CatalogTruncationPolicyResponse {
+    pub mode: String,
+    pub limit: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CatalogImageGenerationModelResponse {
+    pub id: String,
+    pub display_name: String,
+    pub description: Option<String>,
+    pub input_modalities: Option<Vec<String>>,
+    pub output_modalities: Option<Vec<String>>,
+    pub sizes: Option<Vec<String>>,
+    pub quality_options: Option<Vec<String>>,
+    pub background_options: Option<Vec<String>>,
+    pub output_formats: Option<Vec<String>>,
+    pub supports_editing: Option<bool>,
+    pub supports_mask: Option<bool>,
+    pub supports_reference_images: Option<bool>,
+    pub visibility: Option<String>,
+    pub supported_in_api: Option<bool>,
+    pub priority: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -55,12 +94,14 @@ pub struct CatalogProviderResponse {
     pub base_url: String,
     pub protocols: Vec<ProviderProtocol>,
     pub protocol_base_urls: Vec<ProviderProtocolBaseUrl>,
-    pub models: Vec<String>,
+    pub language_models: Vec<String>,
+    pub image_generation_models: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderCatalogResponse {
-    pub models: Vec<CatalogModelResponse>,
+    pub language_models: Vec<CatalogLanguageModelResponse>,
+    pub image_generation_models: Vec<CatalogImageGenerationModelResponse>,
     pub providers: Vec<CatalogProviderResponse>,
 }
 

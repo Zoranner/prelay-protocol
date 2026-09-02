@@ -9,11 +9,11 @@ use prelay_protocol::{
     },
 };
 use prelay_protocol::{
-    CatalogModelResponse, CatalogProviderResponse, CreateEndpointRequest, CreateIdentityRequest,
-    CreateIdentityResponse, CreateProviderRequest, EndpointModelInput, EndpointResponse, ModelType,
-    ProtocolErrorCode, ProviderAuthScheme, ProviderCapabilityOverrides, ProviderCatalogResponse,
-    ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls,
-    ProviderResponse, RotateCredentialRequest, RotateCredentialResponse,
+    CatalogImageGenerationModelResponse, CatalogProviderResponse, CreateEndpointRequest,
+    CreateIdentityRequest, CreateIdentityResponse, CreateProviderRequest, EndpointModelInput,
+    EndpointResponse, ProtocolErrorCode, ProviderAuthScheme, ProviderCapabilityOverrides,
+    ProviderCatalogResponse, ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl,
+    ProviderProtocolBaseUrls, ProviderResponse, RotateCredentialRequest, RotateCredentialResponse,
     TestProviderProtocolRequest, UpdateProviderRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -40,14 +40,25 @@ fn capabilities() -> ProviderCapabilityOverrides {
 }
 
 #[test]
-fn provider_catalog_dtos_use_typed_models_and_protocols() {
+fn provider_catalog_dtos_separate_model_categories_and_protocols() {
     let catalog = ProviderCatalogResponse {
-        models: vec![CatalogModelResponse {
+        language_models: vec![],
+        image_generation_models: vec![CatalogImageGenerationModelResponse {
             id: "gpt-image-1".into(),
             display_name: "GPT Image 1".into(),
-            model_type: ModelType::Image,
-            reasoning_efforts: Vec::new(),
-            default_reasoning_effort: None,
+            description: None,
+            input_modalities: Some(vec!["text".into()]),
+            output_modalities: Some(vec!["image".into()]),
+            sizes: None,
+            quality_options: None,
+            background_options: None,
+            output_formats: None,
+            supports_editing: None,
+            supports_mask: None,
+            supports_reference_images: None,
+            visibility: None,
+            supported_in_api: None,
+            priority: None,
         }],
         providers: vec![CatalogProviderResponse {
             id: "gotoken".into(),
@@ -64,13 +75,17 @@ fn provider_catalog_dtos_use_typed_models_and_protocols() {
                 protocol: ProviderProtocol::ImagesGenerations,
                 base_url: "https://gotoken.cc/v1".into(),
             }],
-            models: vec!["gpt-image-1".into()],
+            language_models: vec![],
+            image_generation_models: vec!["gpt-image-1".into()],
         }],
     };
 
     assert_json_round_trip(catalog.clone());
     let json = serde_json::to_value(catalog).unwrap();
-    assert_eq!(json["models"][0]["model_type"], "image");
+    assert_eq!(
+        json["image_generation_models"][0]["output_modalities"],
+        serde_json::json!(["image"])
+    );
     assert_eq!(
         json["providers"][0]["protocols"],
         serde_json::json!([
