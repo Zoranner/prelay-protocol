@@ -9,10 +9,12 @@ use prelay_protocol::{
     },
 };
 use prelay_protocol::{
-    CreateEndpointRequest, CreateIdentityRequest, CreateIdentityResponse, CreateProviderRequest,
-    EndpointModelInput, EndpointResponse, ProtocolErrorCode, ProviderCapabilityOverrides,
-    ProviderOperationResponse, ProviderProtocolBaseUrls, ProviderResponse, RotateCredentialRequest,
-    RotateCredentialResponse, TestProviderProtocolRequest, UpdateProviderRequest,
+    CatalogModelResponse, CatalogProviderResponse, CreateEndpointRequest, CreateIdentityRequest,
+    CreateIdentityResponse, CreateProviderRequest, EndpointModelInput, EndpointResponse, ModelType,
+    ProtocolErrorCode, ProviderAuthScheme, ProviderCapabilityOverrides, ProviderCatalogResponse,
+    ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls,
+    ProviderResponse, RotateCredentialRequest, RotateCredentialResponse,
+    TestProviderProtocolRequest, UpdateProviderRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -35,6 +37,49 @@ fn capabilities() -> ProviderCapabilityOverrides {
         tool_calls: Some(true),
         ..Default::default()
     }
+}
+
+#[test]
+fn provider_catalog_dtos_use_typed_models_and_protocols() {
+    let catalog = ProviderCatalogResponse {
+        models: vec![CatalogModelResponse {
+            id: "gpt-image-1".into(),
+            display_name: "GPT Image 1".into(),
+            model_type: ModelType::Image,
+            reasoning_efforts: Vec::new(),
+            default_reasoning_effort: None,
+        }],
+        providers: vec![CatalogProviderResponse {
+            id: "gotoken".into(),
+            name: "GoToken 套餐".into(),
+            auth_scheme: ProviderAuthScheme::Bearer,
+            base_url: "https://gotoken.cc".into(),
+            protocols: vec![
+                ProviderProtocol::ChatCompletions,
+                ProviderProtocol::Responses,
+                ProviderProtocol::AnthropicMessages,
+                ProviderProtocol::ImagesGenerations,
+            ],
+            protocol_base_urls: vec![ProviderProtocolBaseUrl {
+                protocol: ProviderProtocol::ImagesGenerations,
+                base_url: "https://gotoken.cc/v1".into(),
+            }],
+            models: vec!["gpt-image-1".into()],
+        }],
+    };
+
+    assert_json_round_trip(catalog.clone());
+    let json = serde_json::to_value(catalog).unwrap();
+    assert_eq!(json["models"][0]["model_type"], "image");
+    assert_eq!(
+        json["providers"][0]["protocols"],
+        serde_json::json!([
+            "chat_completions",
+            "responses",
+            "anthropic_messages",
+            "images_generations",
+        ])
+    );
 }
 
 #[test]

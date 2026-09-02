@@ -21,9 +21,11 @@ pub use identity::{
     RotateCredentialResponse,
 };
 pub use providers::{
-    CreateProviderRequest, ProviderCapabilityOverrides, ProviderModelResponse,
-    ProviderOperationRequest, ProviderOperationResponse, ProviderProtocolBaseUrls,
-    ProviderResponse, TestProviderProtocolRequest, UpdateProviderRequest,
+    CatalogModelResponse, CatalogProviderResponse, CreateProviderRequest, ModelType,
+    ProviderAuthScheme, ProviderCapabilityOverrides, ProviderCatalogResponse,
+    ProviderModelResponse, ProviderOperationRequest, ProviderOperationResponse, ProviderProtocol,
+    ProviderProtocolBaseUrl, ProviderProtocolBaseUrls, ProviderResponse,
+    TestProviderProtocolRequest, UpdateProviderRequest,
 };
 pub use stats::{
     ActivitySummary, ModelStatsSummary, ProviderStatsSummary, StatsOverview,
