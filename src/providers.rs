@@ -153,6 +153,7 @@ pub struct ProviderModelResponse {
     pub id: String,
     pub provider_id: String,
     pub model_name: String,
+    pub display_name: String,
     pub created_at: String,
 }
 

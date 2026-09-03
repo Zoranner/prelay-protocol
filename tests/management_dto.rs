@@ -9,12 +9,13 @@ use prelay_protocol::{
     },
 };
 use prelay_protocol::{
-    CatalogImageGenerationModelResponse, CatalogProviderResponse, CreateEndpointRequest,
-    CreateIdentityRequest, CreateIdentityResponse, CreateProviderRequest, EndpointModelInput,
-    EndpointResponse, ProtocolErrorCode, ProviderAuthScheme, ProviderCapabilityOverrides,
-    ProviderCatalogResponse, ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl,
-    ProviderProtocolBaseUrls, ProviderResponse, RotateCredentialRequest, RotateCredentialResponse,
-    TestProviderProtocolRequest, UpdateProviderRequest,
+    CatalogImageGenerationModelResponse, CatalogLanguageModelResponse, CatalogProviderResponse,
+    CreateEndpointRequest, CreateIdentityRequest, CreateIdentityResponse, CreateProviderRequest,
+    EndpointModelInput, EndpointResponse, ProtocolErrorCode, ProviderAuthScheme,
+    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderOperationResponse,
+    ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls, ProviderResponse,
+    RotateCredentialRequest, RotateCredentialResponse, TestProviderProtocolRequest,
+    UpdateProviderRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -42,7 +43,34 @@ fn capabilities() -> ProviderCapabilityOverrides {
 #[test]
 fn provider_catalog_dtos_separate_model_categories_and_protocols() {
     let catalog = ProviderCatalogResponse {
-        language_models: vec![],
+        language_models: vec![CatalogLanguageModelResponse {
+            id: "gpt-5".into(),
+            display_name: "GPT-5".into(),
+            description: Some("Reasoning model".into()),
+            reasoning_efforts: Some(vec!["low".into(), "high".into()]),
+            default_reasoning_effort: Some("low".into()),
+            context_window: Some(128_000),
+            max_context_window: Some(256_000),
+            effective_context_window_percent: Some(100),
+            input_modalities: Some(vec!["text".into()]),
+            supports_parallel_tool_calls: Some(true),
+            supports_reasoning_summaries: Some(true),
+            supports_image_detail_original: None,
+            support_verbosity: Some(true),
+            default_verbosity: Some("medium".into()),
+            apply_patch_tool_type: None,
+            web_search_tool_type: None,
+            truncation_policy: None,
+            reasoning_summary_format: None,
+            default_reasoning_summary: None,
+            shell_type: None,
+            visibility: Some("public".into()),
+            supported_in_api: Some(true),
+            priority: Some(1),
+            base_instructions: None,
+            experimental_supported_tools: None,
+            minimal_client_version: None,
+        }],
         image_generation_models: vec![CatalogImageGenerationModelResponse {
             id: "gpt-image-1".into(),
             display_name: "GPT Image 1".into(),
@@ -82,6 +110,17 @@ fn provider_catalog_dtos_separate_model_categories_and_protocols() {
 
     assert_json_round_trip(catalog.clone());
     let json = serde_json::to_value(catalog).unwrap();
+    assert_eq!(json["language_models"][0]["id"], "gpt-5");
+    assert_eq!(json["language_models"][0]["display_name"], "GPT-5");
+    assert_eq!(
+        json["language_models"][0]["reasoning_efforts"],
+        serde_json::json!(["low", "high"])
+    );
+    assert_eq!(json["image_generation_models"][0]["id"], "gpt-image-1");
+    assert_eq!(
+        json["image_generation_models"][0]["display_name"],
+        "GPT Image 1"
+    );
     assert_eq!(
         json["image_generation_models"][0]["output_modalities"],
         serde_json::json!(["image"])
@@ -201,6 +240,7 @@ fn management_responses_and_stats_round_trip() {
             id: "model-a".into(),
             provider_id: "provider-a".into(),
             model_name: "deepseek-chat".into(),
+            display_name: "DeepSeek Chat".into(),
             created_at: "2026-08-13T00:00:00Z".into(),
         }],
         created_at: "2026-08-13T00:00:00Z".into(),
@@ -214,6 +254,7 @@ fn management_responses_and_stats_round_trip() {
             id: "endpoint-model-a".into(),
             endpoint_id: "endpoint-a".into(),
             model_name: "assistant".into(),
+            display_name: "Assistant".into(),
             provider_id: "provider-a".into(),
             upstream_model: "deepseek-chat".into(),
             created_at: "2026-08-13T00:00:00Z".into(),
@@ -247,7 +288,9 @@ fn management_responses_and_stats_round_trip() {
         endpoint_name: Some("生产接入点".into()),
         provider_name: Some("DeepSeek".into()),
         model_requested: Some("assistant".into()),
+        model_requested_display_name: Some("Assistant".into()),
         model_upstream: Some("deepseek-chat".into()),
+        model_upstream_display_name: Some("DeepSeek Chat".into()),
         status: "success".into(),
         http_status: Some(200),
         error_code: None,
@@ -261,8 +304,41 @@ fn management_responses_and_stats_round_trip() {
         latency_ms: Some(789),
         upstream_request_id: None,
     });
+    let activity_json = serde_json::to_value(ActivitySummary {
+        id: "activity-a".into(),
+        created_at: "2026-08-13T00:00:00Z".into(),
+        protocol_in: None,
+        protocol_upstream: None,
+        endpoint_name: None,
+        provider_name: None,
+        model_requested: Some("assistant".into()),
+        model_requested_display_name: Some("Assistant".into()),
+        model_upstream: Some("deepseek-chat".into()),
+        model_upstream_display_name: Some("DeepSeek Chat".into()),
+        status: "success".into(),
+        http_status: Some(200),
+        error_code: None,
+        error_message: None,
+        input_tokens: None,
+        output_tokens: None,
+        is_streaming: None,
+        first_token_ms: None,
+        cache_read_tokens: None,
+        cache_write_tokens: None,
+        latency_ms: None,
+        upstream_request_id: None,
+    })
+    .unwrap();
+    assert_eq!(activity_json["model_requested"], "assistant");
+    assert_eq!(activity_json["model_requested_display_name"], "Assistant");
+    assert_eq!(activity_json["model_upstream"], "deepseek-chat");
+    assert_eq!(
+        activity_json["model_upstream_display_name"],
+        "DeepSeek Chat"
+    );
     let model_stats = ModelStatsSummary {
         model_requested: Some("assistant".into()),
+        model_requested_display_name: Some("Assistant".into()),
         total_requests: 12,
         successful_requests: 10,
         failed_requests: 2,
@@ -271,10 +347,13 @@ fn management_responses_and_stats_round_trip() {
         average_latency_ms: Some(789.0),
     };
     assert_json_round_trip(model_stats.clone());
-    assert!(serde_json::to_value(model_stats)
-        .unwrap()
-        .get("estimated_cost")
-        .is_none());
+    let model_stats_json = serde_json::to_value(model_stats).unwrap();
+    assert_eq!(model_stats_json["model_requested"], "assistant");
+    assert_eq!(
+        model_stats_json["model_requested_display_name"],
+        "Assistant"
+    );
+    assert!(model_stats_json.get("estimated_cost").is_none());
     let provider_stats = ProviderStatsSummary {
         provider_id: Some("provider-a".into()),
         provider_name: Some("DeepSeek".into()),

@@ -32,6 +32,7 @@ pub struct EndpointModelResponse {
     pub id: String,
     pub endpoint_id: String,
     pub model_name: String,
+    pub display_name: String,
     pub provider_id: String,
     pub upstream_model: String,
     pub created_at: String,

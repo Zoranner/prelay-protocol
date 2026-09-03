@@ -52,7 +52,9 @@ pub struct ActivitySummary {
     pub endpoint_name: Option<String>,
     pub provider_name: Option<String>,
     pub model_requested: Option<String>,
+    pub model_requested_display_name: Option<String>,
     pub model_upstream: Option<String>,
+    pub model_upstream_display_name: Option<String>,
     pub status: String,
     pub http_status: Option<i64>,
     pub error_code: Option<String>,
@@ -70,6 +72,7 @@ pub struct ActivitySummary {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ModelStatsSummary {
     pub model_requested: Option<String>,
+    pub model_requested_display_name: Option<String>,
     pub total_requests: i64,
     pub successful_requests: i64,
     pub failed_requests: i64,
