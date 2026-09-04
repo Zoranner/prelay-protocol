@@ -1,16 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct EndpointModelInput {
     pub provider_id: String,
     pub upstream_model: String,
-    pub model_name: Option<String>,
-}
-
-impl EndpointModelInput {
-    pub fn default_model_name(upstream_model: &str) -> String {
-        upstream_model.to_string()
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

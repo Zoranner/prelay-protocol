@@ -163,7 +163,6 @@ fn management_requests_round_trip_without_client_identity_id() {
         models: vec![EndpointModelInput {
             provider_id: "provider-a".into(),
             upstream_model: "deepseek-chat".into(),
-            model_name: Some("assistant".into()),
         }],
     };
     let endpoint_update = UpdateEndpointRequest {
@@ -172,7 +171,6 @@ fn management_requests_round_trip_without_client_identity_id() {
         models: Some(vec![EndpointModelInput {
             provider_id: "provider-a".into(),
             upstream_model: "deepseek-reasoner".into(),
-            model_name: Some("reasoner".into()),
         }]),
     };
     let empty_endpoint_update = UpdateEndpointRequest::default();
@@ -210,10 +208,6 @@ fn management_requests_round_trip_without_client_identity_id() {
     assert_eq!(
         empty_endpoint_update_json["models"],
         serde_json::Value::Null
-    );
-    assert_eq!(
-        EndpointModelInput::default_model_name("upstream"),
-        "upstream"
     );
 }
 
@@ -443,4 +437,20 @@ fn protocol_error_code_uses_stable_snake_case_json() {
         code
     );
     assert_eq!(code.as_str(), "identity_already_registered");
+}
+
+#[test]
+fn endpoint_model_input_rejects_custom_public_model_name() {
+    let custom_name = serde_json::json!({
+        "provider_id": "provider-a",
+        "upstream_model": "upstream-model",
+        "modelName": "custom-public-name"
+    });
+    assert!(serde_json::from_value::<EndpointModelInput>(custom_name).is_err());
+
+    let input = EndpointModelInput {
+        provider_id: "provider-a".into(),
+        upstream_model: "upstream-model".into(),
+    };
+    assert_json_round_trip(input);
 }
