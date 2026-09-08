@@ -105,6 +105,14 @@ pub struct ProviderCatalogResponse {
     pub providers: Vec<CatalogProviderResponse>,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ProviderVisibility {
+    Private,
+    Selected,
+    All,
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderCapabilityOverrides {
     pub upstream_protocols: Option<Vec<String>>,
@@ -135,7 +143,6 @@ pub struct CreateProviderRequest {
     pub base_url: String,
     pub api_key: String,
     pub capabilities: Option<ProviderCapabilityOverrides>,
-    pub models: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
@@ -145,16 +152,6 @@ pub struct UpdateProviderRequest {
     pub base_url: Option<String>,
     pub api_key: Option<String>,
     pub capabilities: Option<ProviderCapabilityOverrides>,
-    pub models: Option<Vec<String>>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ProviderModelResponse {
-    pub id: String,
-    pub provider_id: String,
-    pub model_name: String,
-    pub display_name: String,
-    pub created_at: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -167,8 +164,56 @@ pub struct ProviderResponse {
     pub api_key_masked: String,
     pub capabilities: ProviderCapabilityOverrides,
     pub upstream_protocols: Vec<String>,
-    pub models: Vec<ProviderModelResponse>,
     pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderListItemResponse {
+    pub id: String,
+    pub name: String,
+    pub provider_type: String,
+    pub base_url: String,
+    pub capabilities: ProviderCapabilityOverrides,
+    pub upstream_protocols: Vec<String>,
+    pub owner_identity_id: String,
+    pub owner_display_name: String,
+    pub visibility: ProviderVisibility,
+    pub can_manage: bool,
+    pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderSharingResponse {
+    pub visibility: ProviderVisibility,
+    pub selected_identity_ids: Vec<String>,
+    pub can_manage: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct UpdateProviderSharingRequest {
+    pub visibility: ProviderVisibility,
+    pub identity_ids: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderUsageResponse {
+    pub total_requests: i64,
+    pub input_tokens: i64,
+    pub output_tokens: i64,
+    pub total_tokens: i64,
+    pub latest_used_at: Option<String>,
+    pub users: Vec<ProviderUsageUser>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderUsageUser {
+    pub identity_id: String,
+    pub display_name: String,
+    pub request_count: i64,
+    pub input_tokens: i64,
+    pub output_tokens: i64,
+    pub total_tokens: i64,
+    pub latest_used_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

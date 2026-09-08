@@ -2,7 +2,6 @@ use std::fmt::Debug;
 
 use prelay_protocol::{
     endpoints::{EndpointModelResponse, UpdateEndpointRequest},
-    providers::ProviderModelResponse,
     stats::{
         ActivitySummary, LeaderboardMetric, ModelStatsSummary, ProviderStatsSummary, StatsOverview,
         TokenUsageTimelinePoint, UserLeaderboardEntry,
@@ -12,10 +11,11 @@ use prelay_protocol::{
     CatalogImageGenerationModelResponse, CatalogLanguageModelResponse, CatalogProviderResponse,
     CreateEndpointRequest, CreateIdentityRequest, CreateIdentityResponse, CreateProviderRequest,
     EndpointModelInput, EndpointResponse, ProtocolErrorCode, ProviderAuthScheme,
-    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderOperationResponse,
-    ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls, ProviderResponse,
-    RotateCredentialRequest, RotateCredentialResponse, TestProviderProtocolRequest,
-    UpdateProviderRequest,
+    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderListItemResponse,
+    ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls,
+    ProviderResponse, ProviderSharingResponse, ProviderUsageResponse, ProviderUsageUser,
+    ProviderVisibility, RotateCredentialRequest, RotateCredentialResponse,
+    TestProviderProtocolRequest, UpdateProviderRequest, UpdateProviderSharingRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -150,7 +150,6 @@ fn management_requests_round_trip_without_client_identity_id() {
         base_url: "https://api.deepseek.com".into(),
         api_key: "sk-test".into(),
         capabilities: Some(capabilities()),
-        models: vec!["deepseek-chat".into()],
     };
     let update = UpdateProviderRequest {
         name: Some("DeepSeek Production".into()),
@@ -230,13 +229,6 @@ fn management_responses_and_stats_round_trip() {
         api_key_masked: "sk-t...test".into(),
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into(), "anthropic".into()],
-        models: vec![ProviderModelResponse {
-            id: "model-a".into(),
-            provider_id: "provider-a".into(),
-            model_name: "deepseek-chat".into(),
-            display_name: "DeepSeek Chat".into(),
-            created_at: "2026-08-13T00:00:00Z".into(),
-        }],
         created_at: "2026-08-13T00:00:00Z".into(),
     });
     assert_json_round_trip(EndpointResponse {
@@ -453,4 +445,162 @@ fn endpoint_model_input_rejects_custom_public_model_name() {
         upstream_model: "upstream-model".into(),
     };
     assert_json_round_trip(input);
+}
+
+#[test]
+fn provider_visibility_uses_stable_values() {
+    assert_eq!(
+        serde_json::to_value(ProviderVisibility::Private).unwrap(),
+        "private"
+    );
+    assert_eq!(
+        serde_json::to_value(ProviderVisibility::Selected).unwrap(),
+        "selected"
+    );
+    assert_eq!(
+        serde_json::to_value(ProviderVisibility::All).unwrap(),
+        "all"
+    );
+    assert_eq!(
+        serde_json::from_value::<ProviderVisibility>("selected".into()).unwrap(),
+        ProviderVisibility::Selected
+    );
+    assert!(serde_json::from_value::<ProviderVisibility>("invalid".into()).is_err());
+}
+
+#[test]
+fn provider_sharing_dtos_round_trip_selected_identities() {
+    let request = UpdateProviderSharingRequest {
+        visibility: ProviderVisibility::Selected,
+        identity_ids: vec!["identity-b".into(), "identity-c".into()],
+    };
+    let response = ProviderSharingResponse {
+        visibility: ProviderVisibility::Selected,
+        selected_identity_ids: vec!["identity-b".into(), "identity-c".into()],
+        can_manage: true,
+    };
+
+    assert_json_round_trip(request.clone());
+    assert_json_round_trip(response.clone());
+    assert_eq!(
+        serde_json::to_value(request).unwrap(),
+        serde_json::json!({
+            "visibility": "selected",
+            "identity_ids": ["identity-b", "identity-c"]
+        })
+    );
+    assert_eq!(
+        serde_json::to_value(response).unwrap(),
+        serde_json::json!({
+            "visibility": "selected",
+            "selected_identity_ids": ["identity-b", "identity-c"],
+            "can_manage": true
+        })
+    );
+}
+
+#[test]
+fn provider_list_response_has_flat_owner_metadata_without_api_key() {
+    let provider = ProviderListItemResponse {
+        id: "provider-a".into(),
+        name: "DeepSeek".into(),
+        provider_type: "openai_compatible".into(),
+        base_url: "https://api.deepseek.com".into(),
+        capabilities: capabilities(),
+        upstream_protocols: vec!["openai".into()],
+        owner_identity_id: "identity-a".into(),
+        owner_display_name: "研发一组".into(),
+        visibility: ProviderVisibility::All,
+        can_manage: false,
+        created_at: "2026-08-13T00:00:00Z".into(),
+    };
+
+    assert_json_round_trip(provider.clone());
+    let json = serde_json::to_value(provider).unwrap();
+    assert_eq!(json["owner_identity_id"], "identity-a");
+    assert_eq!(json["owner_display_name"], "研发一组");
+    assert!(json.get("owner").is_none());
+    assert_eq!(json["visibility"], "all");
+    assert_eq!(json["can_manage"], false);
+    assert!(json.get("api_key").is_none());
+    assert!(json.get("api_key_masked").is_none());
+}
+
+#[test]
+fn provider_usage_response_contains_total_and_user_counters() {
+    let usage = ProviderUsageResponse {
+        total_requests: 12,
+        input_tokens: 123,
+        output_tokens: 456,
+        total_tokens: 579,
+        latest_used_at: Some("2026-09-08T00:00:00Z".into()),
+        users: vec![ProviderUsageUser {
+            identity_id: "identity-b".into(),
+            display_name: "研发二组".into(),
+            request_count: 4,
+            input_tokens: 40,
+            output_tokens: 50,
+            total_tokens: 90,
+            latest_used_at: Some("2026-09-07T00:00:00Z".into()),
+        }],
+    };
+
+    assert_json_round_trip(usage.clone());
+    let json = serde_json::to_value(usage).unwrap();
+    assert_eq!(json["total_requests"], 12);
+    assert_eq!(json["total_tokens"], 579);
+    assert_eq!(json["users"][0]["display_name"], "研发二组");
+    assert!(json.get("api_key").is_none());
+    assert!(json.get("credential").is_none());
+    assert!(json.get("endpoint_token").is_none());
+}
+
+#[test]
+fn identity_directory_entry_contains_only_display_fields() {
+    let entry = prelay_protocol::IdentityDirectoryEntry {
+        identity_id: "identity-b".into(),
+        display_name: "研发二组".into(),
+    };
+
+    assert_json_round_trip(entry.clone());
+    let json = serde_json::to_value(entry).unwrap();
+    assert_eq!(
+        json,
+        serde_json::json!({
+            "identity_id": "identity-b",
+            "display_name": "研发二组"
+        })
+    );
+}
+
+#[test]
+fn provider_sharing_error_codes_are_stable() {
+    let codes = [
+        (
+            ProtocolErrorCode::InvalidProviderSharing,
+            "invalid_provider_sharing",
+        ),
+        (
+            ProtocolErrorCode::ProviderSharingNotAllowed,
+            "provider_sharing_not_allowed",
+        ),
+        (
+            ProtocolErrorCode::ProviderNotVisible,
+            "provider_not_visible",
+        ),
+        (ProtocolErrorCode::ProviderNotUsable, "provider_not_usable"),
+        (
+            ProtocolErrorCode::ProviderRouteUnavailable,
+            "provider_route_unavailable",
+        ),
+    ];
+
+    for (code, expected) in codes {
+        assert_eq!(code.as_str(), expected);
+        assert_eq!(serde_json::to_value(code).unwrap(), expected);
+        assert_eq!(
+            serde_json::from_value::<ProtocolErrorCode>(expected.into()).unwrap(),
+            code
+        );
+    }
 }

@@ -17,15 +17,17 @@ pub use extensions::{
     ExtensionMcpTransport, ExtensionSummary, ExtensionVersion,
 };
 pub use identity::{
-    CreateIdentityRequest, CreateIdentityResponse, RotateCredentialRequest,
+    CreateIdentityRequest, CreateIdentityResponse, IdentityDirectoryEntry, RotateCredentialRequest,
     RotateCredentialResponse,
 };
 pub use providers::{
     CatalogImageGenerationModelResponse, CatalogLanguageModelResponse, CatalogProviderResponse,
     CatalogTruncationPolicyResponse, CreateProviderRequest, ProviderAuthScheme,
-    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderModelResponse,
+    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderListItemResponse,
     ProviderOperationRequest, ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl,
-    ProviderProtocolBaseUrls, ProviderResponse, TestProviderProtocolRequest, UpdateProviderRequest,
+    ProviderProtocolBaseUrls, ProviderResponse, ProviderSharingResponse, ProviderUsageResponse,
+    ProviderUsageUser, ProviderVisibility, TestProviderProtocolRequest, UpdateProviderRequest,
+    UpdateProviderSharingRequest,
 };
 pub use stats::{
     ActivitySummary, ModelStatsSummary, ProviderStatsSummary, StatsOverview,

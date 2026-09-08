@@ -18,6 +18,12 @@ pub struct CreateIdentityResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct IdentityDirectoryEntry {
+    pub identity_id: String,
+    pub display_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct RotateCredentialRequest {
     pub new_credential: String,
 }
