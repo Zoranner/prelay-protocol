@@ -178,6 +178,7 @@ pub struct ProviderListItemResponse {
     pub owner_identity_id: String,
     pub owner_display_name: String,
     pub visibility: ProviderVisibility,
+    pub selected_identity_ids: Vec<String>,
     pub can_manage: bool,
     pub created_at: String,
 }

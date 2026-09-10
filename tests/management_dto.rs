@@ -511,6 +511,7 @@ fn provider_list_response_has_flat_owner_metadata_without_api_key() {
         owner_identity_id: "identity-a".into(),
         owner_display_name: "研发一组".into(),
         visibility: ProviderVisibility::All,
+        selected_identity_ids: Vec::new(),
         can_manage: false,
         created_at: "2026-08-13T00:00:00Z".into(),
     };
@@ -522,6 +523,7 @@ fn provider_list_response_has_flat_owner_metadata_without_api_key() {
     assert!(json.get("owner").is_none());
     assert_eq!(json["visibility"], "all");
     assert_eq!(json["can_manage"], false);
+    assert_eq!(json["selected_identity_ids"], serde_json::json!([]));
     assert!(json.get("api_key").is_none());
     assert!(json.get("api_key_masked").is_none());
 }
