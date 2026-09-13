@@ -7,7 +7,7 @@
 - 对外 DTO 是两个父仓的共享契约。字段名、可选性、默认值、枚举值和错误码的任何变化，都要先识别 server/client 两侧消费者与 submodule 更新需求。
 - 保持 Rust 导入名 `prelay_protocol` 与 crate 包名 `prelay-protocol`。服务端和客户端都通过各自 `crates/protocol` 子模块的相对路径依赖本仓。
 - Bruno 环境模板只能使用占位符，不得包含 device credential、Endpoint Token 或 Provider API Key。
-- 不要为了父仓的局部实现方便把路由、存储或桌面细节引入此 crate。
+- 共享 DTO 的契约校验可以放在本仓，供两个父仓调用同一份规则；不要为了父仓的局部实现方便把路由、存储或桌面细节引入此 crate。
 
 ## 验证
 
