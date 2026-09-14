@@ -150,6 +150,7 @@ fn management_requests_round_trip_without_client_identity_id() {
         base_url: "https://api.deepseek.com".into(),
         api_key: "sk-test".into(),
         capabilities: Some(capabilities()),
+        disabled_models: None,
     };
     let update = UpdateProviderRequest {
         name: Some("DeepSeek Production".into()),
@@ -229,6 +230,7 @@ fn management_responses_and_stats_round_trip() {
         api_key_masked: "sk-t...test".into(),
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into(), "anthropic".into()],
+        disabled_models: Vec::new(),
         created_at: "2026-08-13T00:00:00Z".into(),
     });
     assert_json_round_trip(EndpointResponse {
@@ -508,6 +510,7 @@ fn provider_list_response_has_flat_owner_metadata_without_api_key() {
         base_url: "https://api.deepseek.com".into(),
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into()],
+        disabled_models: Vec::new(),
         owner_identity_id: "identity-a".into(),
         owner_display_name: "研发一组".into(),
         visibility: ProviderVisibility::All,

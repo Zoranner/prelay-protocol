@@ -143,6 +143,8 @@ pub struct CreateProviderRequest {
     pub base_url: String,
     pub api_key: String,
     pub capabilities: Option<ProviderCapabilityOverrides>,
+    /// 该供应商禁用的目录模型 id；禁用后不再提供给接入点，已有接入点也会被拦。
+    pub disabled_models: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
@@ -152,6 +154,8 @@ pub struct UpdateProviderRequest {
     pub base_url: Option<String>,
     pub api_key: Option<String>,
     pub capabilities: Option<ProviderCapabilityOverrides>,
+    /// 缺省表示保持原值；传空数组表示恢复全部启用。
+    pub disabled_models: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -164,6 +168,7 @@ pub struct ProviderResponse {
     pub api_key_masked: String,
     pub capabilities: ProviderCapabilityOverrides,
     pub upstream_protocols: Vec<String>,
+    pub disabled_models: Vec<String>,
     pub created_at: String,
 }
 
@@ -175,6 +180,7 @@ pub struct ProviderListItemResponse {
     pub base_url: String,
     pub capabilities: ProviderCapabilityOverrides,
     pub upstream_protocols: Vec<String>,
+    pub disabled_models: Vec<String>,
     pub owner_identity_id: String,
     pub owner_display_name: String,
     pub visibility: ProviderVisibility,
