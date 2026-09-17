@@ -43,3 +43,38 @@ impl ProtocolErrorCode {
         }
     }
 }
+
+/// 管理 API 错误响应体。
+///
+/// `code` 保留字符串而不是枚举：服务端新增错误码时，旧客户端仍能解析并回退到通用文案。
+/// 服务端构造时使用 [`ProtocolErrorBody::new`]，保证写入的是 [`ProtocolErrorCode`] 的稳定取值。
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProtocolErrorBody {
+    pub code: String,
+    pub message: String,
+}
+
+impl ProtocolErrorBody {
+    pub fn new(code: ProtocolErrorCode, message: impl Into<String>) -> Self {
+        Self {
+            code: code.as_str().to_owned(),
+            message: message.into(),
+        }
+    }
+}
+
+/// 管理 API 的统一错误响应：`{"error": {"code": "...", "message": "..."}}`。
+///
+/// `message` 是面向诊断的补充信息，语言不作承诺；面向用户的文案由客户端按 `code` 决定。
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProtocolErrorResponse {
+    pub error: ProtocolErrorBody,
+}
+
+impl ProtocolErrorResponse {
+    pub fn new(code: ProtocolErrorCode, message: impl Into<String>) -> Self {
+        Self {
+            error: ProtocolErrorBody::new(code, message),
+        }
+    }
+}
