@@ -13,9 +13,9 @@ pub use endpoints::{
 };
 pub use error::{ProtocolErrorBody, ProtocolErrorCode, ProtocolErrorResponse};
 pub use extensions::{
-    validate_mcp_manifest, ExtensionFile, ExtensionInstallBundle, ExtensionKind,
-    ExtensionMcpManifest, ExtensionMcpTransport, ExtensionSummary, ExtensionVersion,
-    McpManifestError,
+    validate_mcp_manifest, CatalogKind, ExtensionArtifact, ExtensionArtifactSummary, ExtensionFile,
+    ExtensionInstallBundle, ExtensionKind, ExtensionMcpManifest, ExtensionMcpTransport,
+    ExtensionSummary, ExtensionVersion, McpManifestError,
 };
 pub use identity::{
     CreateIdentityRequest, CreateIdentityResponse, IdentityDirectoryEntry, RotateCredentialRequest,
