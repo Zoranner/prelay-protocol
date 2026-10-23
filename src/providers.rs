@@ -5,15 +5,13 @@ use serde::{Deserialize, Serialize};
 pub enum ProviderProtocol {
     ChatCompletions,
     Responses,
-    AnthropicMessages,
     ImagesGenerations,
 }
 
 impl ProviderProtocol {
-    pub const ORDERED: [Self; 4] = [
+    pub const ORDERED: [Self; 3] = [
         Self::ChatCompletions,
         Self::Responses,
-        Self::AnthropicMessages,
         Self::ImagesGenerations,
     ];
 }
@@ -22,7 +20,6 @@ impl ProviderProtocol {
 #[serde(rename_all = "snake_case")]
 pub enum ProviderAuthScheme {
     Bearer,
-    Anthropic,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -132,7 +129,6 @@ pub struct ProviderCapabilityOverrides {
 pub struct ProviderProtocolBaseUrls {
     pub responses: Option<String>,
     pub openai: Option<String>,
-    pub anthropic: Option<String>,
     pub images_generations: Option<String>,
 }
 

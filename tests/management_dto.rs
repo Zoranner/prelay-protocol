@@ -96,7 +96,6 @@ fn provider_catalog_dtos_separate_model_categories_and_protocols() {
             protocols: vec![
                 ProviderProtocol::ChatCompletions,
                 ProviderProtocol::Responses,
-                ProviderProtocol::AnthropicMessages,
                 ProviderProtocol::ImagesGenerations,
             ],
             protocol_base_urls: vec![ProviderProtocolBaseUrl {
@@ -127,12 +126,7 @@ fn provider_catalog_dtos_separate_model_categories_and_protocols() {
     );
     assert_eq!(
         json["providers"][0]["protocols"],
-        serde_json::json!([
-            "chat_completions",
-            "responses",
-            "anthropic_messages",
-            "images_generations",
-        ])
+        serde_json::json!(["chat_completions", "responses", "images_generations"])
     );
 }
 
@@ -229,7 +223,7 @@ fn management_responses_and_stats_round_trip() {
         api_key: "sk-test".into(),
         api_key_masked: "sk-t...test".into(),
         capabilities: capabilities(),
-        upstream_protocols: vec!["openai".into(), "anthropic".into()],
+        upstream_protocols: vec!["openai".into(), "responses".into()],
         models: Vec::new(),
         created_at: "2026-08-13T00:00:00Z".into(),
     });
