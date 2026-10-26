@@ -6,6 +6,16 @@ mod manifest;
 
 pub use manifest::{validate_mcp_manifest, McpManifestError};
 
+/// Hook 定义文件在扩展包内的固定相对路径。
+///
+/// `hooks/` 下的其他文件都是支持文件，不参与 Hook 定义解析。
+pub const HOOKS_MANIFEST_PATH: &str = "hooks/hooks.json";
+
+/// Hook 命令中引用客户端受管安装根的占位符。
+///
+/// 客户端在写入宿主 Hook 配置前只替换该占位符，其他 `${...}` 保持不变。
+pub const HOOK_ROOT_PLACEHOLDER: &str = "${PRELAY_HOOK_ROOT}";
+
 /// 扩展制品类型。
 ///
 /// [`ExtensionKind::Unknown`] 只用于客户端解析未来服务端新增的制品类型，
@@ -64,13 +74,23 @@ pub struct ExtensionSummary {
     pub artifacts: Vec<ExtensionArtifactSummary>,
 }
 
+/// 扩展包中的单个文件。
+///
+/// `content_base64` 始终承载原始字节。Hook 支持文件可以是任意二进制内容，
+/// 服务端和客户端不得按 UTF-8 或 JSON 重新解释。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ExtensionFile {
+    /// 扩展包内相对路径。Hook 支持文件按这里的路径原样安装。
     pub path: String,
+    /// 文件原始字节的 Base64 编码；支持文件可以不是 UTF-8，也可以是二进制。
     pub content_base64: String,
 }
 
+/// 一个安装制品及其全部文件。
+///
+/// Hook 制品同时包含 `hooks/hooks.json` 定义文件和 `hooks/` 下的支持文件。
+/// 只有定义文件需要解析；其他文件按字节安装，不要求是 UTF-8 或 JSON。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ExtensionArtifact {

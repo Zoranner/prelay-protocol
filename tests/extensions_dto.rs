@@ -3,7 +3,8 @@ use std::collections::BTreeMap;
 use prelay_protocol::{
     CatalogKind, ExtensionArtifact, ExtensionArtifactSummary, ExtensionFile,
     ExtensionInstallBundle, ExtensionKind, ExtensionMcpManifest, ExtensionMcpTransport,
-    ExtensionSummary, ExtensionVersion, ProtocolErrorCode,
+    ExtensionSummary, ExtensionVersion, ProtocolErrorCode, HOOKS_MANIFEST_PATH,
+    HOOK_ROOT_PLACEHOLDER,
 };
 
 #[test]
@@ -138,6 +139,50 @@ fn install_bundle_round_trips_multiple_artifacts() {
     assert_eq!(
         value["artifacts"][1]["kind"],
         serde_json::Value::String("hook".to_string())
+    );
+    assert_eq!(
+        serde_json::from_value::<ExtensionInstallBundle>(value).unwrap(),
+        bundle
+    );
+}
+
+#[test]
+fn hook_artifact_carries_binary_support_files_without_new_wire_fields() {
+    assert_eq!(HOOKS_MANIFEST_PATH, "hooks/hooks.json");
+    assert_eq!(HOOK_ROOT_PLACEHOLDER, "${PRELAY_HOOK_ROOT}");
+
+    let bundle = ExtensionInstallBundle {
+        name: "superpowers".to_string(),
+        version: ExtensionVersion {
+            tag: "v6.3.1".to_string(),
+            commit_sha: "b".repeat(40),
+            updated_at: "2026-10-21T08:30:00Z".to_string(),
+        },
+        artifacts: vec![ExtensionArtifact {
+            kind: ExtensionKind::Hook,
+            files: vec![
+                ExtensionFile {
+                    path: HOOKS_MANIFEST_PATH.to_string(),
+                    content_base64: "e30=".to_string(),
+                },
+                ExtensionFile {
+                    path: "hooks/lib/runner.bin".to_string(),
+                    content_base64: "AJ+Slv8=".to_string(),
+                },
+            ],
+        }],
+        skipped: vec!["README.md".to_string()],
+    };
+
+    let value = serde_json::to_value(&bundle).unwrap();
+    assert_eq!(value["artifacts"][0]["kind"], "hook");
+    assert_eq!(
+        value["artifacts"][0]["files"][1]["path"],
+        "hooks/lib/runner.bin"
+    );
+    assert_eq!(
+        value["artifacts"][0]["files"][1]["contentBase64"],
+        "AJ+Slv8="
     );
     assert_eq!(
         serde_json::from_value::<ExtensionInstallBundle>(value).unwrap(),
