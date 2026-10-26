@@ -71,7 +71,9 @@ pub struct ActivitySummary {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ModelStatsSummary {
+    /// 当前目录中的模型 ID；`None` 表示所有已从目录删除的模型合并成的汇总行。
     pub model_requested: Option<String>,
+    /// 目录显示名；已删除模型汇总行为“已删除模型”。
     pub model_requested_display_name: Option<String>,
     pub total_requests: i64,
     pub successful_requests: i64,
@@ -83,7 +85,9 @@ pub struct ModelStatsSummary {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ProviderStatsSummary {
-    pub provider_id: Option<String>,
+    /// 目录供应商类型；已从目录删除或无法回填时归入“已删除供应商”。
+    pub provider_type: Option<String>,
+    /// 目录供应商显示名，不使用用户创建实例时的名称。
     pub provider_name: Option<String>,
     pub total_requests: i64,
     pub successful_requests: i64,

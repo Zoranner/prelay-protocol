@@ -337,7 +337,7 @@ fn management_responses_and_stats_round_trip() {
     );
     assert!(model_stats_json.get("estimated_cost").is_none());
     let provider_stats = ProviderStatsSummary {
-        provider_id: Some("provider-a".into()),
+        provider_type: Some("deepseek".into()),
         provider_name: Some("DeepSeek".into()),
         total_requests: 12,
         successful_requests: 10,
