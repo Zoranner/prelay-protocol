@@ -46,6 +46,8 @@ pub struct CatalogLanguageModelResponse {
     pub default_verbosity: Option<String>,
     pub apply_patch_tool_type: Option<String>,
     pub web_search_tool_type: Option<String>,
+    /// Codex `tool_search` 能力；与 `web_search_tool_type` 无关，缺省表示不支持。
+    pub supports_search_tool: Option<bool>,
     pub truncation_policy: Option<CatalogTruncationPolicyResponse>,
     pub reasoning_summary_format: Option<String>,
     pub default_reasoning_summary: Option<String>,
