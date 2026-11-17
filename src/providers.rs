@@ -190,8 +190,7 @@ pub struct ProviderListItemResponse {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "snake_case")]
-pub enum QuotaWindowKind {
-    FiveHour,
+pub enum ShareQuotaWindowKind {
     Day,
     Week,
     Month,
@@ -207,7 +206,7 @@ pub enum ProviderQuotaMode {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ShareQuotaWindow {
-    pub window: QuotaWindowKind,
+    pub window: ShareQuotaWindowKind,
     pub limit: i64,
     pub accumulate: bool,
     pub reset_time: String,
@@ -240,32 +239,78 @@ pub struct UpdateProviderSharingRequest {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct QuotaWindowResponse {
-    pub window: QuotaWindowKind,
-    pub accumulate: bool,
-    pub remaining_percent: f64,
-    pub remaining: Option<i64>,
-    pub limit: Option<i64>,
-    pub used: Option<i64>,
-    pub carry_over: Option<i64>,
+pub struct QuotaWindow {
+    /// 展示名称，例如 "5 小时"、"7 天"、"月"、"MCP · 月"
+    pub label: String,
+    /// 窗口长度；月窗口可以不填
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub span_secs: Option<i64>,
+    /// 统一为已用百分比，0 到 100
+    pub used_percent: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resets_at: Option<String>,
+    /// 厂商原样的计数，例如 "1.2k / 3k"
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
+    /// 不影响模型调用，例如 GLM 的 MCP 月额度
+    #[serde(default)]
+    pub aside: bool,
+    /// 多模型共享同一个额度池
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pool: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct QuotaBalanceResponse {
-    pub available: bool,
-    pub amount: String,
+pub struct QuotaBalancePart {
     pub currency: String,
+    pub amount: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct QuotaBalance {
+    /// 厂商原样的余额文本，例如 "¥128.40 · $2.50"
+    pub text: String,
+    #[serde(default)]
+    pub parts: Vec<QuotaBalancePart>,
+    pub available: bool,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum QuotaErrorCode {
+    Unsupported,
+    Unconfigured,
+    Unauthorized,
+    Unreachable,
+    InvalidResponse,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct QuotaError {
+    pub code: QuotaErrorCode,
+    pub message: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(tag = "kind", rename_all = "snake_case")]
-pub enum ProviderQuota {
-    Plan { windows: Vec<QuotaWindowResponse> },
-    Balance(QuotaBalanceResponse),
-    Shared { windows: Vec<QuotaWindowResponse> },
-    Unsupported,
-    Error { message: String },
+pub struct ProviderQuota {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub plan: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub windows: Vec<QuotaWindow>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub balance: Option<QuotaBalance>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<QuotaError>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub read_at: Option<String>,
+    #[serde(default)]
+    pub stale: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

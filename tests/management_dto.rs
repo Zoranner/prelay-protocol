@@ -15,8 +15,8 @@ use prelay_protocol::{
     ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls,
     ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse, ProviderResponse, ProviderShareInput,
     ProviderShareResponse, ProviderSharingResponse, ProviderUsageResponse, ProviderUsageUser,
-    ProviderVisibility, QuotaBalanceResponse, QuotaWindowKind, QuotaWindowResponse,
-    RotateCredentialRequest, RotateCredentialResponse, ShareQuotaWindow,
+    ProviderVisibility, QuotaBalance, QuotaBalancePart, QuotaError, QuotaErrorCode, QuotaWindow,
+    RotateCredentialRequest, RotateCredentialResponse, ShareQuotaWindow, ShareQuotaWindowKind,
     TestProviderProtocolRequest, UpdateProviderRequest, UpdateProviderSharingRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -478,7 +478,7 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
             ProviderShareInput {
                 identity_id: "identity-c".into(),
                 quota: Some(vec![ShareQuotaWindow {
-                    window: QuotaWindowKind::Day,
+                    window: ShareQuotaWindowKind::Day,
                     limit: 100_000_000,
                     accumulate: true,
                     reset_time: "00:00".into(),
@@ -532,48 +532,65 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
 }
 
 #[test]
-fn provider_quota_response_is_tagged_by_kind() {
+fn provider_quota_response_carries_windows_and_balance() {
     let response = ProviderQuotaResponse {
         provider_id: "provider-a".into(),
         owner_identity_id: "identity-a".into(),
         owner_display_name: "研发一组".into(),
-        mode: ProviderQuotaMode::SharedLimited,
-        quota: ProviderQuota::Shared {
-            windows: vec![QuotaWindowResponse {
-                window: QuotaWindowKind::Week,
-                accumulate: false,
-                remaining_percent: 62.5,
-                remaining: Some(62_500_000),
-                limit: Some(100_000_000),
-                used: Some(37_500_000),
-                carry_over: Some(0),
-                resets_at: Some("2026-11-23T00:00:00+08:00".into()),
+        mode: ProviderQuotaMode::Own,
+        quota: ProviderQuota {
+            plan: Some("Pro".into()),
+            windows: vec![QuotaWindow {
+                label: "5 小时".into(),
+                span_secs: Some(5 * 60 * 60),
+                used_percent: 37.5,
+                resets_at: Some("2026-11-17T15:00:00+08:00".into()),
+                display: Some("1.2k / 3k".into()),
+                amount: Some("1200".into()),
+                limit: Some("3000".into()),
+                unit: Some("requests".into()),
+                aside: false,
+                pool: None,
             }],
+            balance: Some(QuotaBalance {
+                text: "¥128.40".into(),
+                parts: vec![QuotaBalancePart {
+                    currency: "CNY".into(),
+                    amount: "128.40".into(),
+                }],
+                available: true,
+            }),
+            error: None,
+            read_at: Some("2026-11-17T10:00:00+00:00".into()),
+            stale: false,
         },
-        updated_at: Some("2026-11-16T10:00:00+00:00".into()),
+        updated_at: Some("2026-11-17T10:00:00+00:00".into()),
     };
     assert_json_round_trip(response.clone());
     let json = serde_json::to_value(response).unwrap();
-    assert_eq!(json["mode"], "shared_limited");
-    assert_eq!(json["quota"]["kind"], "shared");
-    assert_eq!(json["quota"]["windows"][0]["window"], "week");
+    assert_eq!(json["mode"], "own");
+    assert_eq!(json["quota"]["plan"], "Pro");
+    assert_eq!(json["quota"]["windows"][0]["label"], "5 小时");
+    assert_eq!(json["quota"]["windows"][0]["used_percent"], 37.5);
+    assert_eq!(json["quota"]["balance"]["text"], "¥128.40");
+    assert!(json["quota"].get("kind").is_none());
 
-    let balance = ProviderQuotaResponse {
-        provider_id: "provider-b".into(),
-        owner_identity_id: "identity-a".into(),
-        owner_display_name: "研发一组".into(),
-        mode: ProviderQuotaMode::Own,
-        quota: ProviderQuota::Balance(QuotaBalanceResponse {
-            available: true,
-            amount: "128.40".into(),
-            currency: "CNY".into(),
+    let error = ProviderQuota {
+        plan: None,
+        windows: Vec::new(),
+        balance: None,
+        error: Some(QuotaError {
+            code: QuotaErrorCode::Unconfigured,
+            message: "缺少组织上下文".into(),
         }),
-        updated_at: None,
+        read_at: None,
+        stale: true,
     };
-    assert_json_round_trip(balance.clone());
-    let json = serde_json::to_value(balance).unwrap();
-    assert_eq!(json["quota"]["kind"], "balance");
-    assert_eq!(json["quota"]["amount"], "128.40");
+    let json = serde_json::to_value(error).unwrap();
+    assert_eq!(json["error"]["code"], "unconfigured");
+    assert_eq!(json["stale"], true);
+    assert!(json.get("windows").is_none());
+    assert!(json.get("balance").is_none());
 }
 
 #[test]
