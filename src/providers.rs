@@ -188,17 +188,94 @@ pub struct ProviderListItemResponse {
     pub created_at: String,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum QuotaWindowKind {
+    FiveHour,
+    Day,
+    Week,
+    Month,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ProviderQuotaMode {
+    Own,
+    SharedUnlimited,
+    SharedLimited,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ShareQuotaWindow {
+    pub window: QuotaWindowKind,
+    pub limit: i64,
+    pub accumulate: bool,
+    pub reset_time: String,
+    pub reset_weekday: Option<u8>,
+    pub reset_day: Option<u8>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderShareInput {
+    pub identity_id: String,
+    pub quota: Option<Vec<ShareQuotaWindow>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderShareResponse {
+    pub identity_id: String,
+    pub display_name: String,
+    pub quota: Option<Vec<ShareQuotaWindow>>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderSharingResponse {
-    pub visibility: ProviderVisibility,
-    pub selected_identity_ids: Vec<String>,
+    pub shares: Vec<ProviderShareResponse>,
     pub can_manage: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UpdateProviderSharingRequest {
-    pub visibility: ProviderVisibility,
-    pub identity_ids: Vec<String>,
+    pub shares: Vec<ProviderShareInput>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct QuotaWindowResponse {
+    pub window: QuotaWindowKind,
+    pub accumulate: bool,
+    pub remaining_percent: f64,
+    pub remaining: Option<i64>,
+    pub limit: Option<i64>,
+    pub used: Option<i64>,
+    pub carry_over: Option<i64>,
+    pub resets_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct QuotaBalanceResponse {
+    pub available: bool,
+    pub amount: String,
+    pub currency: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum ProviderQuota {
+    Plan { windows: Vec<QuotaWindowResponse> },
+    Balance(QuotaBalanceResponse),
+    Shared { windows: Vec<QuotaWindowResponse> },
+    Unsupported,
+    Error { message: String },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct ProviderQuotaResponse {
+    pub provider_id: String,
+    pub owner_identity_id: String,
+    pub owner_display_name: String,
+    pub mode: ProviderQuotaMode,
+    pub quota: ProviderQuota,
+    pub updated_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

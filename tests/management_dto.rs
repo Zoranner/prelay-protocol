@@ -13,8 +13,10 @@ use prelay_protocol::{
     EndpointModelInput, EndpointResponse, ProtocolErrorCode, ProviderAuthScheme,
     ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderListItemResponse,
     ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls,
-    ProviderResponse, ProviderSharingResponse, ProviderUsageResponse, ProviderUsageUser,
-    ProviderVisibility, RotateCredentialRequest, RotateCredentialResponse,
+    ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse, ProviderResponse, ProviderShareInput,
+    ProviderShareResponse, ProviderSharingResponse, ProviderUsageResponse, ProviderUsageUser,
+    ProviderVisibility, QuotaBalanceResponse, QuotaWindowKind, QuotaWindowResponse,
+    RotateCredentialRequest, RotateCredentialResponse, ShareQuotaWindow,
     TestProviderProtocolRequest, UpdateProviderRequest, UpdateProviderSharingRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -466,14 +468,32 @@ fn provider_visibility_uses_stable_values() {
 }
 
 #[test]
-fn provider_sharing_dtos_round_trip_selected_identities() {
+fn provider_sharing_dtos_round_trip_quota_shares() {
     let request = UpdateProviderSharingRequest {
-        visibility: ProviderVisibility::Selected,
-        identity_ids: vec!["identity-b".into(), "identity-c".into()],
+        shares: vec![
+            ProviderShareInput {
+                identity_id: "identity-b".into(),
+                quota: None,
+            },
+            ProviderShareInput {
+                identity_id: "identity-c".into(),
+                quota: Some(vec![ShareQuotaWindow {
+                    window: QuotaWindowKind::Day,
+                    limit: 100_000_000,
+                    accumulate: true,
+                    reset_time: "00:00".into(),
+                    reset_weekday: None,
+                    reset_day: None,
+                }]),
+            },
+        ],
     };
     let response = ProviderSharingResponse {
-        visibility: ProviderVisibility::Selected,
-        selected_identity_ids: vec!["identity-b".into(), "identity-c".into()],
+        shares: vec![ProviderShareResponse {
+            identity_id: "identity-b".into(),
+            display_name: "研发二组".into(),
+            quota: None,
+        }],
         can_manage: true,
     };
 
@@ -482,18 +502,78 @@ fn provider_sharing_dtos_round_trip_selected_identities() {
     assert_eq!(
         serde_json::to_value(request).unwrap(),
         serde_json::json!({
-            "visibility": "selected",
-            "identity_ids": ["identity-b", "identity-c"]
+            "shares": [
+                { "identity_id": "identity-b", "quota": null },
+                {
+                    "identity_id": "identity-c",
+                    "quota": [{
+                        "window": "day",
+                        "limit": 100000000,
+                        "accumulate": true,
+                        "reset_time": "00:00",
+                        "reset_weekday": null,
+                        "reset_day": null
+                    }]
+                }
+            ]
         })
     );
     assert_eq!(
         serde_json::to_value(response).unwrap(),
         serde_json::json!({
-            "visibility": "selected",
-            "selected_identity_ids": ["identity-b", "identity-c"],
+            "shares": [{
+                "identity_id": "identity-b",
+                "display_name": "研发二组",
+                "quota": null
+            }],
             "can_manage": true
         })
     );
+}
+
+#[test]
+fn provider_quota_response_is_tagged_by_kind() {
+    let response = ProviderQuotaResponse {
+        provider_id: "provider-a".into(),
+        owner_identity_id: "identity-a".into(),
+        owner_display_name: "研发一组".into(),
+        mode: ProviderQuotaMode::SharedLimited,
+        quota: ProviderQuota::Shared {
+            windows: vec![QuotaWindowResponse {
+                window: QuotaWindowKind::Week,
+                accumulate: false,
+                remaining_percent: 62.5,
+                remaining: Some(62_500_000),
+                limit: Some(100_000_000),
+                used: Some(37_500_000),
+                carry_over: Some(0),
+                resets_at: Some("2026-11-23T00:00:00+08:00".into()),
+            }],
+        },
+        updated_at: Some("2026-11-16T10:00:00+00:00".into()),
+    };
+    assert_json_round_trip(response.clone());
+    let json = serde_json::to_value(response).unwrap();
+    assert_eq!(json["mode"], "shared_limited");
+    assert_eq!(json["quota"]["kind"], "shared");
+    assert_eq!(json["quota"]["windows"][0]["window"], "week");
+
+    let balance = ProviderQuotaResponse {
+        provider_id: "provider-b".into(),
+        owner_identity_id: "identity-a".into(),
+        owner_display_name: "研发一组".into(),
+        mode: ProviderQuotaMode::Own,
+        quota: ProviderQuota::Balance(QuotaBalanceResponse {
+            available: true,
+            amount: "128.40".into(),
+            currency: "CNY".into(),
+        }),
+        updated_at: None,
+    };
+    assert_json_round_trip(balance.clone());
+    let json = serde_json::to_value(balance).unwrap();
+    assert_eq!(json["quota"]["kind"], "balance");
+    assert_eq!(json["quota"]["amount"], "128.40");
 }
 
 #[test]

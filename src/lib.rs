@@ -27,9 +27,11 @@ pub use providers::{
     CatalogTruncationPolicyResponse, CreateProviderRequest, ProviderAuthScheme,
     ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderListItemResponse,
     ProviderOperationRequest, ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl,
-    ProviderProtocolBaseUrls, ProviderResponse, ProviderSharingResponse, ProviderUsageResponse,
-    ProviderUsageUser, ProviderVisibility, TestProviderProtocolRequest, UpdateProviderRequest,
-    UpdateProviderSharingRequest,
+    ProviderProtocolBaseUrls, ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse,
+    ProviderResponse, ProviderShareInput, ProviderShareResponse, ProviderSharingResponse,
+    ProviderUsageResponse, ProviderUsageUser, ProviderVisibility, QuotaBalanceResponse,
+    QuotaWindowKind, QuotaWindowResponse, ShareQuotaWindow, TestProviderProtocolRequest,
+    UpdateProviderRequest, UpdateProviderSharingRequest,
 };
 pub use stats::{
     ActivitySummary, ModelStatsSummary, ProviderStatsSummary, StatsOverview,
