@@ -210,18 +210,16 @@ pub struct ShareQuotaWindow {
     pub reset_day: Option<u8>,
 }
 
-/// 共享给指定用户时的一条授权；`quota` 为空表示不限额。
+/// 共享给指定用户时的一条授权。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderSharingUserInput {
     pub identity_id: String,
-    pub quota: Option<Vec<ShareQuotaWindow>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderSharingUserResponse {
     pub identity_id: String,
     pub display_name: String,
-    pub quota: Option<Vec<ShareQuotaWindow>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -229,12 +227,15 @@ pub struct ProviderSharingResponse {
     pub visibility: ProviderVisibility,
     /// 仅在 `visibility` 为 `selected` 时非空。
     pub users: Vec<ProviderSharingUserResponse>,
+    /// 共享额度规则，对所有被共享用户生效；为空表示不限额。
+    pub quota: Option<Vec<ShareQuotaWindow>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UpdateProviderSharingRequest {
     pub visibility: ProviderVisibility,
     pub users: Vec<ProviderSharingUserInput>,
+    pub quota: Option<Vec<ShareQuotaWindow>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

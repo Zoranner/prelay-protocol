@@ -480,28 +480,27 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
         users: vec![
             ProviderSharingUserInput {
                 identity_id: "identity-b".into(),
-                quota: None,
             },
             ProviderSharingUserInput {
                 identity_id: "identity-c".into(),
-                quota: Some(vec![ShareQuotaWindow {
-                    window: ShareQuotaWindowKind::Day,
-                    limit: 100_000_000,
-                    accumulate: true,
-                    reset_time: "00:00".into(),
-                    reset_weekday: None,
-                    reset_day: None,
-                }]),
             },
         ],
+        quota: Some(vec![ShareQuotaWindow {
+            window: ShareQuotaWindowKind::Day,
+            limit: 100_000_000,
+            accumulate: true,
+            reset_time: "00:00".into(),
+            reset_weekday: None,
+            reset_day: None,
+        }]),
     };
     let response = ProviderSharingResponse {
         visibility: ProviderVisibility::Selected,
         users: vec![ProviderSharingUserResponse {
             identity_id: "identity-b".into(),
             display_name: "研发二组".into(),
-            quota: None,
         }],
+        quota: None,
     };
 
     assert_json_round_trip(request.clone());
@@ -511,19 +510,17 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
         serde_json::json!({
             "visibility": "selected",
             "users": [
-                { "identity_id": "identity-b", "quota": null },
-                {
-                    "identity_id": "identity-c",
-                    "quota": [{
-                        "window": "day",
-                        "limit": 100000000,
-                        "accumulate": true,
-                        "reset_time": "00:00",
-                        "reset_weekday": null,
-                        "reset_day": null
-                    }]
-                }
-            ]
+                { "identity_id": "identity-b" },
+                { "identity_id": "identity-c" }
+            ],
+            "quota": [{
+                "window": "day",
+                "limit": 100000000,
+                "accumulate": true,
+                "reset_time": "00:00",
+                "reset_weekday": null,
+                "reset_day": null
+            }]
         })
     );
     assert_eq!(
@@ -532,9 +529,9 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
             "visibility": "selected",
             "users": [{
                 "identity_id": "identity-b",
-                "display_name": "研发二组",
-                "quota": null
-            }]
+                "display_name": "研发二组"
+            }],
+            "quota": null
         })
     );
 }
@@ -544,6 +541,7 @@ fn provider_sharing_accepts_all_visibility_with_empty_users() {
     let request = UpdateProviderSharingRequest {
         visibility: ProviderVisibility::All,
         users: Vec::new(),
+        quota: None,
     };
 
     assert_json_round_trip(request.clone());
@@ -551,7 +549,8 @@ fn provider_sharing_accepts_all_visibility_with_empty_users() {
         serde_json::to_value(request).unwrap(),
         serde_json::json!({
             "visibility": "all",
-            "users": []
+            "users": [],
+            "quota": null
         })
     );
 }
