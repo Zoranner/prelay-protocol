@@ -28,10 +28,11 @@ pub use providers::{
     ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderCredential,
     ProviderOperationRequest, ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl,
     ProviderProtocolBaseUrls, ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse,
-    ProviderResponse, ProviderShareInput, ProviderShareResponse, ProviderSharingResponse,
-    ProviderUsageResponse, ProviderUsageUser, ProviderVisibility, QuotaBalance, QuotaBalancePart,
-    QuotaError, QuotaErrorCode, QuotaWindow, ShareQuotaWindow, ShareQuotaWindowKind,
-    TestProviderProtocolRequest, UpdateProviderRequest, UpdateProviderSharingRequest,
+    ProviderResponse, ProviderSharingResponse, ProviderSharingUserInput,
+    ProviderSharingUserResponse, ProviderUsageResponse, ProviderUsageUser, ProviderVisibility,
+    QuotaBalance, QuotaBalancePart, QuotaError, QuotaErrorCode, QuotaWindow, ShareQuotaWindow,
+    ShareQuotaWindowKind, TestProviderProtocolRequest, UpdateProviderRequest,
+    UpdateProviderSharingRequest,
 };
 pub use stats::{
     ActivitySummary, ModelStatsSummary, ProviderStatsSummary, StatsOverview,

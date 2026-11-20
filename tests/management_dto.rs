@@ -13,11 +13,12 @@ use prelay_protocol::{
     EndpointModelInput, EndpointResponse, ProtocolErrorCode, ProviderAuthScheme,
     ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderCredential,
     ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls,
-    ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse, ProviderResponse, ProviderShareInput,
-    ProviderShareResponse, ProviderSharingResponse, ProviderUsageResponse, ProviderUsageUser,
-    ProviderVisibility, QuotaBalance, QuotaBalancePart, QuotaError, QuotaErrorCode, QuotaWindow,
-    RotateCredentialRequest, RotateCredentialResponse, ShareQuotaWindow, ShareQuotaWindowKind,
-    TestProviderProtocolRequest, UpdateProviderRequest, UpdateProviderSharingRequest,
+    ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse, ProviderResponse,
+    ProviderSharingResponse, ProviderSharingUserInput, ProviderSharingUserResponse,
+    ProviderUsageResponse, ProviderUsageUser, ProviderVisibility, QuotaBalance, QuotaBalancePart,
+    QuotaError, QuotaErrorCode, QuotaWindow, RotateCredentialRequest, RotateCredentialResponse,
+    ShareQuotaWindow, ShareQuotaWindowKind, TestProviderProtocolRequest, UpdateProviderRequest,
+    UpdateProviderSharingRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -475,12 +476,13 @@ fn provider_visibility_uses_stable_values() {
 #[test]
 fn provider_sharing_dtos_round_trip_quota_shares() {
     let request = UpdateProviderSharingRequest {
-        shares: vec![
-            ProviderShareInput {
+        visibility: ProviderVisibility::Selected,
+        users: vec![
+            ProviderSharingUserInput {
                 identity_id: "identity-b".into(),
                 quota: None,
             },
-            ProviderShareInput {
+            ProviderSharingUserInput {
                 identity_id: "identity-c".into(),
                 quota: Some(vec![ShareQuotaWindow {
                     window: ShareQuotaWindowKind::Day,
@@ -494,12 +496,12 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
         ],
     };
     let response = ProviderSharingResponse {
-        shares: vec![ProviderShareResponse {
+        visibility: ProviderVisibility::Selected,
+        users: vec![ProviderSharingUserResponse {
             identity_id: "identity-b".into(),
             display_name: "研发二组".into(),
             quota: None,
         }],
-        can_manage: true,
     };
 
     assert_json_round_trip(request.clone());
@@ -507,7 +509,8 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
     assert_eq!(
         serde_json::to_value(request).unwrap(),
         serde_json::json!({
-            "shares": [
+            "visibility": "selected",
+            "users": [
                 { "identity_id": "identity-b", "quota": null },
                 {
                     "identity_id": "identity-c",
@@ -526,12 +529,29 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
     assert_eq!(
         serde_json::to_value(response).unwrap(),
         serde_json::json!({
-            "shares": [{
+            "visibility": "selected",
+            "users": [{
                 "identity_id": "identity-b",
                 "display_name": "研发二组",
                 "quota": null
-            }],
-            "can_manage": true
+            }]
+        })
+    );
+}
+
+#[test]
+fn provider_sharing_accepts_all_visibility_with_empty_users() {
+    let request = UpdateProviderSharingRequest {
+        visibility: ProviderVisibility::All,
+        users: Vec::new(),
+    };
+
+    assert_json_round_trip(request.clone());
+    assert_eq!(
+        serde_json::to_value(request).unwrap(),
+        serde_json::json!({
+            "visibility": "all",
+            "users": []
         })
     );
 }
