@@ -31,7 +31,6 @@ fn extension_catalog_dtos_use_management_api_field_names() {
                 content_base64: "IyBFbmdpbmVlcmluZyBydWxlcw==".to_string(),
             }],
         }],
-        skipped: vec!["README.md".to_string()],
     };
 
     assert_eq!(
@@ -64,7 +63,6 @@ fn extension_catalog_dtos_use_management_api_field_names() {
                     "contentBase64": "IyBFbmdpbmVlcmluZyBydWxlcw=="
                 }]
             }],
-            "skipped": ["README.md"],
             "kind": "rule",
             "files": [{
                 "path": "AGENTS.md",
@@ -100,7 +98,6 @@ fn install_bundle_accepts_the_legacy_single_artifact_shape() {
     assert_eq!(bundle.artifacts[0].kind, ExtensionKind::Skill);
     assert_eq!(bundle.artifacts[0].files.len(), 1);
     assert_eq!(bundle.artifacts[0].files[0].path, "skills/review/SKILL.md");
-    assert!(bundle.skipped.is_empty());
 }
 
 #[test]
@@ -128,7 +125,6 @@ fn install_bundle_round_trips_multiple_artifacts() {
                 }],
             },
         ],
-        skipped: vec!["README.md".to_string(), "LICENSE".to_string()],
     };
 
     let value = serde_json::to_value(&bundle).unwrap();
@@ -171,7 +167,6 @@ fn hook_artifact_carries_binary_support_files_without_new_wire_fields() {
                 },
             ],
         }],
-        skipped: vec!["README.md".to_string()],
     };
 
     let value = serde_json::to_value(&bundle).unwrap();

@@ -110,7 +110,6 @@ pub struct ExtensionInstallBundle {
     pub name: String,
     pub version: ExtensionVersion,
     pub artifacts: Vec<ExtensionArtifact>,
-    pub skipped: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -119,7 +118,6 @@ struct ExtensionInstallBundleOutput<'a> {
     name: &'a str,
     version: &'a ExtensionVersion,
     artifacts: &'a [ExtensionArtifact],
-    skipped: &'a [String],
     #[serde(skip_serializing_if = "Option::is_none")]
     kind: Option<ExtensionKind>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -146,7 +144,6 @@ impl Serialize for ExtensionInstallBundle {
             name: &self.name,
             version: &self.version,
             artifacts: &self.artifacts,
-            skipped: &self.skipped,
             kind: legacy.map(|artifact| artifact.kind),
             files: legacy.map(|artifact| artifact.files.as_slice()),
         }
@@ -161,8 +158,6 @@ struct ExtensionInstallBundleWire {
     version: ExtensionVersion,
     #[serde(default)]
     artifacts: Vec<ExtensionArtifact>,
-    #[serde(default)]
-    skipped: Vec<String>,
     #[serde(default)]
     kind: Option<ExtensionKind>,
     #[serde(default)]
@@ -190,7 +185,6 @@ impl<'de> Deserialize<'de> for ExtensionInstallBundle {
             name: wire.name,
             version: wire.version,
             artifacts,
-            skipped: wire.skipped,
         })
     }
 }
