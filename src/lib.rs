@@ -25,7 +25,7 @@ pub use identity::{
 pub use providers::{
     CatalogImageGenerationModelResponse, CatalogLanguageModelResponse, CatalogProviderResponse,
     CatalogTruncationPolicyResponse, CreateProviderRequest, ProviderAuthScheme,
-    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderListItemResponse,
+    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderCredential,
     ProviderOperationRequest, ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl,
     ProviderProtocolBaseUrls, ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse,
     ProviderResponse, ProviderShareInput, ProviderShareResponse, ProviderSharingResponse,

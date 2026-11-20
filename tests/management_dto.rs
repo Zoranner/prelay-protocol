@@ -11,7 +11,7 @@ use prelay_protocol::{
     CatalogImageGenerationModelResponse, CatalogLanguageModelResponse, CatalogProviderResponse,
     CreateEndpointRequest, CreateIdentityRequest, CreateIdentityResponse, CreateProviderRequest,
     EndpointModelInput, EndpointResponse, ProtocolErrorCode, ProviderAuthScheme,
-    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderListItemResponse,
+    ProviderCapabilityOverrides, ProviderCatalogResponse, ProviderCredential,
     ProviderOperationResponse, ProviderProtocol, ProviderProtocolBaseUrl, ProviderProtocolBaseUrls,
     ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse, ProviderResponse, ProviderShareInput,
     ProviderShareResponse, ProviderSharingResponse, ProviderUsageResponse, ProviderUsageUser,
@@ -223,12 +223,17 @@ fn management_responses_and_stats_round_trip() {
         name: "DeepSeek".into(),
         provider_type: "openai_compatible".into(),
         base_url: "https://api.deepseek.com".into(),
-        api_key: "sk-test".into(),
-        api_key_masked: "sk-t...test".into(),
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into(), "responses".into()],
         models: Vec::new(),
         created_at: "2026-08-13T00:00:00Z".into(),
+        owner_identity_id: "identity-a".into(),
+        owner_display_name: "研发一组".into(),
+        visibility: ProviderVisibility::Private,
+        credential: Some(ProviderCredential {
+            api_key: "sk-test".into(),
+            api_key_masked: "********".into(),
+        }),
     });
     assert_json_round_trip(EndpointResponse {
         id: "endpoint-a".into(),
@@ -594,8 +599,8 @@ fn provider_quota_response_carries_windows_and_balance() {
 }
 
 #[test]
-fn provider_list_response_has_flat_owner_metadata_without_api_key() {
-    let provider = ProviderListItemResponse {
+fn provider_read_model_shares_one_shape_across_list_and_edit() {
+    let provider = ProviderResponse {
         id: "provider-a".into(),
         name: "DeepSeek".into(),
         provider_type: "openai_compatible".into(),
@@ -603,24 +608,36 @@ fn provider_list_response_has_flat_owner_metadata_without_api_key() {
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into()],
         models: Vec::new(),
+        created_at: "2026-08-13T00:00:00Z".into(),
         owner_identity_id: "identity-a".into(),
         owner_display_name: "研发一组".into(),
         visibility: ProviderVisibility::All,
-        selected_identity_ids: Vec::new(),
-        can_manage: false,
-        created_at: "2026-08-13T00:00:00Z".into(),
+        credential: None,
     };
 
     assert_json_round_trip(provider.clone());
-    let json = serde_json::to_value(provider).unwrap();
+    let json = serde_json::to_value(&provider).unwrap();
     assert_eq!(json["owner_identity_id"], "identity-a");
     assert_eq!(json["owner_display_name"], "研发一组");
     assert!(json.get("owner").is_none());
     assert_eq!(json["visibility"], "all");
-    assert_eq!(json["can_manage"], false);
-    assert_eq!(json["selected_identity_ids"], serde_json::json!([]));
+    assert!(json.get("can_manage").is_none());
+    assert!(json.get("selected_identity_ids").is_none());
+    assert!(json["credential"].is_null());
     assert!(json.get("api_key").is_none());
     assert!(json.get("api_key_masked").is_none());
+
+    let editable = ProviderResponse {
+        credential: Some(ProviderCredential {
+            api_key: "sk-test".into(),
+            api_key_masked: "********".into(),
+        }),
+        ..provider
+    };
+    assert_json_round_trip(editable.clone());
+    let json = serde_json::to_value(editable).unwrap();
+    assert_eq!(json["credential"]["api_key"], "sk-test");
+    assert_eq!(json["credential"]["api_key_masked"], "********");
 }
 
 #[test]

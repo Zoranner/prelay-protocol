@@ -156,36 +156,32 @@ pub struct UpdateProviderRequest {
     pub models: Option<Vec<String>>,
 }
 
+/// Provider 唯一读模型：列表、编辑前加载和保存回写共用同一份结构。
+///
+/// 编辑权限由 `owner_identity_id` 与当前身份比对得出，不另设权限字段；
+/// `credential` 只在创建人读取时返回，列表恒为 `None`。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderResponse {
     pub id: String,
     pub name: String,
     pub provider_type: String,
     pub base_url: String,
-    pub api_key: String,
-    pub api_key_masked: String,
     pub capabilities: ProviderCapabilityOverrides,
     pub upstream_protocols: Vec<String>,
     /// 该供应商启用的模型清单，与目录条目比对可以判断模型是否已下架。
     pub models: Vec<String>,
     pub created_at: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ProviderListItemResponse {
-    pub id: String,
-    pub name: String,
-    pub provider_type: String,
-    pub base_url: String,
-    pub capabilities: ProviderCapabilityOverrides,
-    pub upstream_protocols: Vec<String>,
-    pub models: Vec<String>,
     pub owner_identity_id: String,
     pub owner_display_name: String,
     pub visibility: ProviderVisibility,
-    pub selected_identity_ids: Vec<String>,
-    pub can_manage: bool,
-    pub created_at: String,
+    pub credential: Option<ProviderCredential>,
+}
+
+/// 创建人可见的上游凭据；`api_key` 供编辑时回填和复制。
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProviderCredential {
+    pub api_key: String,
+    pub api_key_masked: String,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
