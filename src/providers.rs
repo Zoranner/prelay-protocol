@@ -238,10 +238,28 @@ pub struct UpdateProviderSharingRequest {
     pub quota: Option<Vec<ShareQuotaWindow>>,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum QuotaWindowKind {
+    Custom,
+    Rolling,
+    Day,
+    Week,
+    Month,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum QuotaUnit {
+    Tokens,
+    Usd,
+    Credits,
+    Requests,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct QuotaWindow {
-    /// 展示名称，例如 "5 小时"、"7 天"、"月"、"MCP · 月"
-    pub label: String,
+    pub kind: QuotaWindowKind,
     /// 窗口长度；月窗口可以不填
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub span_secs: Option<i64>,
@@ -249,21 +267,18 @@ pub struct QuotaWindow {
     pub used_percent: f64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resets_at: Option<String>,
+    /// 仅共享限额窗口使用，表示剩余 token；个人套餐窗口不填
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remaining: Option<f64>,
+    /// 仅共享限额窗口使用，表示 token 上限
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<f64>,
+    /// 仅共享限额窗口使用，当前为 tokens
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<QuotaUnit>,
     /// 厂商原样的计数，例如 "1.2k / 3k"
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub display: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub amount: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub limit: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub unit: Option<String>,
-    /// 不影响模型调用，例如 GLM 的 MCP 月额度
-    #[serde(default)]
-    pub aside: bool,
-    /// 多模型共享同一个额度池
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub pool: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -274,9 +289,6 @@ pub struct QuotaBalancePart {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct QuotaBalance {
-    /// 厂商原样的余额文本，例如 "¥128.40 · $2.50"
-    pub text: String,
-    #[serde(default)]
     pub parts: Vec<QuotaBalancePart>,
     pub available: bool,
 }

@@ -16,9 +16,9 @@ use prelay_protocol::{
     ProviderQuota, ProviderQuotaMode, ProviderQuotaResponse, ProviderResponse,
     ProviderSharingResponse, ProviderSharingUserInput, ProviderSharingUserResponse,
     ProviderUsageResponse, ProviderUsageUser, ProviderVisibility, QuotaBalance, QuotaBalancePart,
-    QuotaError, QuotaErrorCode, QuotaWindow, RotateCredentialRequest, RotateCredentialResponse,
-    ShareQuotaWindow, ShareQuotaWindowKind, TestProviderProtocolRequest, UpdateProviderRequest,
-    UpdateProviderSharingRequest,
+    QuotaError, QuotaErrorCode, QuotaUnit, QuotaWindow, QuotaWindowKind, RotateCredentialRequest,
+    RotateCredentialResponse, ShareQuotaWindow, ShareQuotaWindowKind, TestProviderProtocolRequest,
+    UpdateProviderRequest, UpdateProviderSharingRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -565,19 +565,16 @@ fn provider_quota_response_carries_windows_and_balance() {
         quota: ProviderQuota {
             plan: Some("Pro".into()),
             windows: vec![QuotaWindow {
-                label: "5 小时".into(),
+                kind: QuotaWindowKind::Rolling,
                 span_secs: Some(5 * 60 * 60),
                 used_percent: 37.5,
                 resets_at: Some("2026-11-17T15:00:00+08:00".into()),
+                remaining: Some(1200.0),
+                limit: Some(3000.0),
+                unit: Some(QuotaUnit::Requests),
                 display: Some("1.2k / 3k".into()),
-                amount: Some("1200".into()),
-                limit: Some("3000".into()),
-                unit: Some("requests".into()),
-                aside: false,
-                pool: None,
             }],
             balance: Some(QuotaBalance {
-                text: "¥128.40".into(),
                 parts: vec![QuotaBalancePart {
                     currency: "CNY".into(),
                     amount: "128.40".into(),
@@ -594,9 +591,12 @@ fn provider_quota_response_carries_windows_and_balance() {
     let json = serde_json::to_value(response).unwrap();
     assert_eq!(json["mode"], "own");
     assert_eq!(json["quota"]["plan"], "Pro");
-    assert_eq!(json["quota"]["windows"][0]["label"], "5 小时");
+    assert_eq!(json["quota"]["windows"][0]["kind"], "rolling");
+    assert_eq!(json["quota"]["windows"][0]["unit"], "requests");
     assert_eq!(json["quota"]["windows"][0]["used_percent"], 37.5);
-    assert_eq!(json["quota"]["balance"]["text"], "¥128.40");
+    assert!(json["quota"]["windows"][0].get("label").is_none());
+    assert!(json["quota"]["windows"][0].get("aside").is_none());
+    assert!(json["quota"]["balance"].get("text").is_none());
     assert!(json["quota"].get("kind").is_none());
 
     let error = ProviderQuota {
@@ -615,6 +615,42 @@ fn provider_quota_response_carries_windows_and_balance() {
     assert_eq!(json["stale"], true);
     assert!(json.get("windows").is_none());
     assert!(json.get("balance").is_none());
+}
+
+#[test]
+fn quota_windows_carry_semantic_kinds() {
+    let window = QuotaWindow {
+        kind: QuotaWindowKind::Month,
+        span_secs: None,
+        used_percent: 42.0,
+        resets_at: Some("2026-12-01T00:00:00+08:00".into()),
+        remaining: Some(58.0),
+        limit: Some(100.0),
+        unit: Some(QuotaUnit::Tokens),
+        display: None,
+    };
+    let value = serde_json::to_value(&window).unwrap();
+    assert_eq!(value["kind"], "month");
+    assert_eq!(value["unit"], "tokens");
+    assert!(value.get("label").is_none());
+    assert!(value.get("aside").is_none());
+    assert!(value.get("pool").is_none());
+    let back: QuotaWindow = serde_json::from_value(value).unwrap();
+    assert_eq!(back, window);
+}
+
+#[test]
+fn quota_windows_allow_percentage_only() {
+    let value = serde_json::json!({
+        "kind": "rolling",
+        "span_secs": 18000,
+        "used_percent": 12.5
+    });
+    let window: QuotaWindow = serde_json::from_value(value).unwrap();
+    assert_eq!(window.kind, QuotaWindowKind::Rolling);
+    assert!(window.remaining.is_none());
+    assert!(window.limit.is_none());
+    assert!(window.unit.is_none());
 }
 
 #[test]
