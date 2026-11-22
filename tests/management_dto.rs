@@ -32,7 +32,6 @@ where
 
 fn capabilities() -> ProviderCapabilityOverrides {
     ProviderCapabilityOverrides {
-        upstream_protocols: Some(vec!["openai".into(), "images_generations".into()]),
         protocol_base_urls: Some(ProviderProtocolBaseUrls {
             openai: Some("https://api.example/v1".into()),
             images_generations: Some("https://images.example/v1".into()),
@@ -41,6 +40,23 @@ fn capabilities() -> ProviderCapabilityOverrides {
         tool_calls: Some(true),
         ..Default::default()
     }
+}
+
+#[test]
+fn provider_capabilities_omit_legacy_upstream_protocols() {
+    let value = serde_json::to_value(capabilities()).expect("serialize capabilities");
+    assert!(value.get("upstream_protocols").is_none());
+}
+
+#[test]
+fn provider_capabilities_ignore_legacy_upstream_protocols() {
+    let capabilities: ProviderCapabilityOverrides = serde_json::from_value(serde_json::json!({
+        "upstream_protocols": ["openai"],
+        "tool_calls": true
+    }))
+    .expect("deserialize capabilities");
+
+    assert_eq!(capabilities.tool_calls, Some(true));
 }
 
 #[test]

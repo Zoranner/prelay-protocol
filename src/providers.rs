@@ -114,7 +114,6 @@ pub enum ProviderVisibility {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ProviderCapabilityOverrides {
-    pub upstream_protocols: Option<Vec<String>>,
     pub protocol_base_urls: Option<ProviderProtocolBaseUrls>,
     pub tool_calls: Option<bool>,
     pub reasoning: Option<bool>,

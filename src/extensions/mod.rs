@@ -105,50 +105,11 @@ pub struct ExtensionArtifactSummary {
     pub file_count: usize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 pub struct ExtensionInstallBundle {
     pub name: String,
     pub version: ExtensionVersion,
     pub artifacts: Vec<ExtensionArtifact>,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ExtensionInstallBundleOutput<'a> {
-    name: &'a str,
-    version: &'a ExtensionVersion,
-    artifacts: &'a [ExtensionArtifact],
-    #[serde(skip_serializing_if = "Option::is_none")]
-    kind: Option<ExtensionKind>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    files: Option<&'a [ExtensionFile]>,
-}
-
-impl Serialize for ExtensionInstallBundle {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let legacy = match self.artifacts.as_slice() {
-            [artifact]
-                if matches!(
-                    artifact.kind,
-                    ExtensionKind::Rule | ExtensionKind::Skill | ExtensionKind::Mcp
-                ) =>
-            {
-                Some(artifact)
-            }
-            _ => None,
-        };
-        ExtensionInstallBundleOutput {
-            name: &self.name,
-            version: &self.version,
-            artifacts: &self.artifacts,
-            kind: legacy.map(|artifact| artifact.kind),
-            files: legacy.map(|artifact| artifact.files.as_slice()),
-        }
-        .serialize(serializer)
-    }
 }
 
 #[derive(Deserialize)]

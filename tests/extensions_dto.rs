@@ -62,11 +62,6 @@ fn extension_catalog_dtos_use_management_api_field_names() {
                     "path": "AGENTS.md",
                     "contentBase64": "IyBFbmdpbmVlcmluZyBydWxlcw=="
                 }]
-            }],
-            "kind": "rule",
-            "files": [{
-                "path": "AGENTS.md",
-                "contentBase64": "IyBFbmdpbmVlcmluZyBydWxlcw=="
             }]
         })
     );
@@ -75,6 +70,30 @@ fn extension_catalog_dtos_use_management_api_field_names() {
         "content": "# Engineering rules"
     }))
     .is_err());
+}
+
+#[test]
+fn single_artifact_bundle_serializes_only_artifacts() {
+    let bundle = ExtensionInstallBundle {
+        name: "engineering-rules".to_string(),
+        version: ExtensionVersion {
+            tag: "v1.2.3".to_string(),
+            commit_sha: "a".repeat(40),
+            updated_at: "2026-08-28T08:30:00Z".to_string(),
+        },
+        artifacts: vec![ExtensionArtifact {
+            kind: ExtensionKind::Rule,
+            files: vec![ExtensionFile {
+                path: "AGENTS.md".to_string(),
+                content_base64: "IyBFbmdpbmVlcmluZyBydWxlcw==".to_string(),
+            }],
+        }],
+    };
+
+    let value = serde_json::to_value(&bundle).expect("serialize bundle");
+    assert!(value.get("kind").is_none());
+    assert!(value.get("files").is_none());
+    assert_eq!(value["artifacts"][0]["kind"], "rule");
 }
 
 #[test]
