@@ -118,6 +118,7 @@ fn provider_catalog_dtos_separate_model_categories_and_protocols() {
                 ProviderProtocol::Responses,
                 ProviderProtocol::ImagesGenerations,
             ],
+            deprecated: false,
             protocol_base_urls: vec![ProviderProtocolBaseUrl {
                 protocol: ProviderProtocol::ImagesGenerations,
                 base_url: "https://gotoken.cc/v1".into(),
@@ -239,6 +240,7 @@ fn management_responses_and_stats_round_trip() {
         id: "provider-a".into(),
         name: "DeepSeek".into(),
         provider_type: "openai_compatible".into(),
+        deprecated: false,
         base_url: "https://api.deepseek.com".into(),
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into(), "responses".into()],
@@ -674,6 +676,7 @@ fn provider_read_model_shares_one_shape_across_list_and_edit() {
         id: "provider-a".into(),
         name: "DeepSeek".into(),
         provider_type: "openai_compatible".into(),
+        deprecated: false,
         base_url: "https://api.deepseek.com".into(),
         capabilities: capabilities(),
         upstream_protocols: vec!["openai".into()],
