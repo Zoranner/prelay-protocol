@@ -433,7 +433,6 @@ fn provider_operation_dtos_round_trip() {
         latency_ms: Some(42),
         first_token_ms: None,
         error: Some("上游连接失败".into()),
-        models: None,
     });
 }
 

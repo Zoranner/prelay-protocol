@@ -377,5 +377,4 @@ pub struct ProviderOperationResponse {
     pub latency_ms: Option<i64>,
     pub first_token_ms: Option<i64>,
     pub error: Option<String>,
-    pub models: Option<Vec<String>>,
 }
