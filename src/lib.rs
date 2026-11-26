@@ -11,7 +11,7 @@ pub use endpoints::{
     CreateEndpointRequest, EndpointModelInput, EndpointModelResponse, EndpointResponse,
     UpdateEndpointRequest,
 };
-pub use error::{ProtocolErrorBody, ProtocolErrorCode, ProtocolErrorResponse};
+pub use error::{ProtocolErrorBody, ProtocolErrorCode, ProtocolErrorResponse, V1ErrorCode};
 pub use extensions::{
     validate_mcp_manifest, CatalogKind, ExtensionArtifact, ExtensionArtifactSummary, ExtensionFile,
     ExtensionInstallBundle, ExtensionKind, ExtensionMcpManifest, ExtensionMcpTransport,

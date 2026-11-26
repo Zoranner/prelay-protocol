@@ -434,23 +434,56 @@ fn provider_operation_dtos_round_trip() {
         protocol: Some("openai".into()),
         latency_ms: Some(42),
         first_token_ms: None,
-        error: Some("上游连接失败".into()),
+        error_code: Some("upstream_connect".into()),
+        error: Some("upstream connect failed".into()),
     });
 }
 
 #[test]
-fn protocol_error_code_uses_stable_snake_case_json() {
-    let code = ProtocolErrorCode::IdentityAlreadyRegistered;
+fn protocol_error_codes_are_all_registered_and_stable() {
+    let mut seen = std::collections::BTreeSet::new();
 
+    for code in ProtocolErrorCode::ALL {
+        let stable = code.as_str();
+
+        assert!(
+            seen.insert(stable),
+            "duplicate protocol error code: {stable}"
+        );
+        assert_eq!(serde_json::to_value(code).unwrap(), stable);
+        assert_eq!(
+            serde_json::from_value::<ProtocolErrorCode>(stable.into()).unwrap(),
+            code
+        );
+    }
+
+    assert_eq!(seen.len(), ProtocolErrorCode::ALL.len());
     assert_eq!(
-        serde_json::to_value(code).unwrap(),
+        ProtocolErrorCode::IdentityAlreadyRegistered.as_str(),
         "identity_already_registered"
     );
+}
+
+#[test]
+fn v1_error_codes_are_all_registered_and_stable() {
+    let mut seen = std::collections::BTreeSet::new();
+
+    for code in prelay_protocol::V1ErrorCode::ALL {
+        let stable = code.as_str();
+
+        assert!(seen.insert(stable), "duplicate v1 error code: {stable}");
+        assert_eq!(serde_json::to_value(code).unwrap(), stable);
+        assert_eq!(
+            serde_json::from_value::<prelay_protocol::V1ErrorCode>(stable.into()).unwrap(),
+            code
+        );
+    }
+
+    assert_eq!(seen.len(), prelay_protocol::V1ErrorCode::ALL.len());
     assert_eq!(
-        serde_json::from_value::<ProtocolErrorCode>("identity_already_registered".into()).unwrap(),
-        code
+        prelay_protocol::V1ErrorCode::SharedQuotaExhausted.as_str(),
+        "shared_quota_exhausted"
     );
-    assert_eq!(code.as_str(), "identity_already_registered");
 }
 
 #[test]

@@ -378,5 +378,8 @@ pub struct ProviderOperationResponse {
     pub protocol: Option<String>,
     pub latency_ms: Option<i64>,
     pub first_token_ms: Option<i64>,
+    /// 失败时的稳定错误码；`error` 只保留诊断信息。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error_code: Option<String>,
     pub error: Option<String>,
 }
