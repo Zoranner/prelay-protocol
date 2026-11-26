@@ -17,7 +17,7 @@ use prelay_protocol::{
     ProviderSharingResponse, ProviderSharingUserInput, ProviderSharingUserResponse,
     ProviderUsageResponse, ProviderUsageUser, ProviderVisibility, QuotaBalance, QuotaBalancePart,
     QuotaError, QuotaErrorCode, QuotaUnit, QuotaWindow, QuotaWindowKind, RotateCredentialRequest,
-    RotateCredentialResponse, ShareQuotaWindow, ShareQuotaWindowKind, TestProviderProtocolRequest,
+    RotateCredentialResponse, ShareQuotaAccumulate, ShareQuotaRule, TestProviderProtocolRequest,
     UpdateProviderRequest, UpdateProviderSharingRequest,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -535,14 +535,10 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
                 identity_id: "identity-c".into(),
             },
         ],
-        quota: Some(vec![ShareQuotaWindow {
-            window: ShareQuotaWindowKind::Day,
-            limit: 100_000_000,
-            accumulate: true,
-            reset_time: "00:00".into(),
-            reset_weekday: None,
-            reset_day: None,
-        }]),
+        quota: Some(ShareQuotaRule {
+            amount: 100_000_000,
+            accumulate: ShareQuotaAccumulate::Week,
+        }),
     };
     let response = ProviderSharingResponse {
         visibility: ProviderVisibility::Selected,
@@ -563,14 +559,10 @@ fn provider_sharing_dtos_round_trip_quota_shares() {
                 { "identity_id": "identity-b" },
                 { "identity_id": "identity-c" }
             ],
-            "quota": [{
-                "window": "day",
-                "limit": 100000000,
-                "accumulate": true,
-                "reset_time": "00:00",
-                "reset_weekday": null,
-                "reset_day": null
-            }]
+            "quota": {
+                "amount": 100000000,
+                "accumulate": "week"
+            }
         })
     );
     assert_eq!(

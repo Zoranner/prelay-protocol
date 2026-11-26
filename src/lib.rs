@@ -31,7 +31,7 @@ pub use providers::{
     ProviderResponse, ProviderSharingResponse, ProviderSharingUserInput,
     ProviderSharingUserResponse, ProviderUsageResponse, ProviderUsageUser, ProviderVisibility,
     QuotaBalance, QuotaBalancePart, QuotaError, QuotaErrorCode, QuotaUnit, QuotaWindow,
-    QuotaWindowKind, ShareQuotaWindow, ShareQuotaWindowKind, TestProviderProtocolRequest,
+    QuotaWindowKind, ShareQuotaAccumulate, ShareQuotaRule, TestProviderProtocolRequest,
     UpdateProviderRequest, UpdateProviderSharingRequest,
 };
 pub use stats::{

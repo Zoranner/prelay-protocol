@@ -185,14 +185,6 @@ pub struct ProviderCredential {
     pub api_key_masked: String,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
-#[serde(rename_all = "snake_case")]
-pub enum ShareQuotaWindowKind {
-    Day,
-    Week,
-    Month,
-}
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum ProviderQuotaMode {
@@ -201,14 +193,23 @@ pub enum ProviderQuotaMode {
     SharedLimited,
 }
 
+/// 共享额度的累积范围：不累积按天清零，周、月按自然周期累积。
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum ShareQuotaAccumulate {
+    #[default]
+    None,
+    Week,
+    Month,
+}
+
+/// 共享额度规则：每天注入 `amount` 个 token，在累积范围内一直可用。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ShareQuotaWindow {
-    pub window: ShareQuotaWindowKind,
-    pub limit: i64,
-    pub accumulate: bool,
-    pub reset_time: String,
-    pub reset_weekday: Option<u8>,
-    pub reset_day: Option<u8>,
+pub struct ShareQuotaRule {
+    /// 每天注入的 token 额度。
+    pub amount: i64,
+    #[serde(default)]
+    pub accumulate: ShareQuotaAccumulate,
 }
 
 /// 共享给指定用户时的一条授权。
@@ -229,14 +230,14 @@ pub struct ProviderSharingResponse {
     /// 仅在 `visibility` 为 `selected` 时非空。
     pub users: Vec<ProviderSharingUserResponse>,
     /// 共享额度规则，对所有被共享用户生效；为空表示不限额。
-    pub quota: Option<Vec<ShareQuotaWindow>>,
+    pub quota: Option<ShareQuotaRule>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UpdateProviderSharingRequest {
     pub visibility: ProviderVisibility,
     pub users: Vec<ProviderSharingUserInput>,
-    pub quota: Option<Vec<ShareQuotaWindow>>,
+    pub quota: Option<ShareQuotaRule>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
