@@ -46,6 +46,32 @@ impl<'de> Deserialize<'de> for ExtensionKind {
     }
 }
 
+/// 插件包的生命周期策略，由服务端从 Gitea topic 推导。
+///
+/// 未知值按 [`ExtensionPolicy::Normal`] 解析，保证服务端新增策略时旧客户端仍能读取目录。
+#[derive(Debug, Clone, Copy, Default, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ExtensionPolicy {
+    #[default]
+    Normal,
+    Required,
+    Deprecated,
+}
+
+impl<'de> Deserialize<'de> for ExtensionPolicy {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = String::deserialize(deserializer)?;
+        Ok(match value.as_str() {
+            "required" => Self::Required,
+            "deprecated" => Self::Deprecated,
+            _ => Self::Normal,
+        })
+    }
+}
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum CatalogKind {
@@ -72,6 +98,8 @@ pub struct ExtensionSummary {
     pub catalog_kind: Option<CatalogKind>,
     #[serde(default)]
     pub artifacts: Vec<ExtensionArtifactSummary>,
+    #[serde(default)]
+    pub policy: ExtensionPolicy,
 }
 
 /// 扩展包中的单个文件。

@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use prelay_protocol::{
     CatalogKind, ExtensionArtifact, ExtensionArtifactSummary, ExtensionFile,
     ExtensionInstallBundle, ExtensionKind, ExtensionMcpManifest, ExtensionMcpTransport,
-    ExtensionSummary, ExtensionVersion, ProtocolErrorCode, HOOKS_MANIFEST_PATH,
+    ExtensionPolicy, ExtensionSummary, ExtensionVersion, ProtocolErrorCode, HOOKS_MANIFEST_PATH,
     HOOK_ROOT_PLACEHOLDER,
 };
 
@@ -20,6 +20,7 @@ fn extension_catalog_dtos_use_management_api_field_names() {
         latest: version.clone(),
         catalog_kind: Some(CatalogKind::Rule),
         artifacts: Vec::new(),
+        policy: ExtensionPolicy::Normal,
     };
     let bundle = ExtensionInstallBundle {
         name: summary.name.clone(),
@@ -44,7 +45,8 @@ fn extension_catalog_dtos_use_management_api_field_names() {
                 "updatedAt": "2026-08-28T08:30:00Z"
             },
             "catalogKind": "rule",
-            "artifacts": []
+            "artifacts": [],
+            "policy": "normal"
         })
     );
     assert_eq!(
@@ -302,5 +304,35 @@ fn mcp_manifest_uses_a_tagged_transport() {
                 "timeoutMs": 10_000
             }
         })
+    );
+}
+
+#[test]
+fn extension_policy_defaults_to_normal_and_ignores_unknown_values() {
+    let base = serde_json::json!({
+        "name": "demo",
+        "repository": "https://git.example.test/agents/demo",
+        "latest": {
+            "tag": "v1.0.0",
+            "commitSha": "a".repeat(40),
+            "updatedAt": "2026-11-27T00:00:00Z"
+        }
+    });
+
+    let missing: ExtensionSummary = serde_json::from_value(base.clone()).unwrap();
+    assert_eq!(missing.policy, ExtensionPolicy::Normal);
+
+    let mut unknown = base.clone();
+    unknown["policy"] = serde_json::json!("archived");
+    let unknown: ExtensionSummary = serde_json::from_value(unknown).unwrap();
+    assert_eq!(unknown.policy, ExtensionPolicy::Normal);
+
+    let mut required = base;
+    required["policy"] = serde_json::json!("required");
+    let required: ExtensionSummary = serde_json::from_value(required).unwrap();
+    assert_eq!(required.policy, ExtensionPolicy::Required);
+    assert_eq!(
+        serde_json::to_value(&required).unwrap()["policy"],
+        serde_json::json!("required")
     );
 }

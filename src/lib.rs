@@ -15,7 +15,7 @@ pub use error::{ProtocolErrorBody, ProtocolErrorCode, ProtocolErrorResponse, V1E
 pub use extensions::{
     validate_mcp_manifest, CatalogKind, ExtensionArtifact, ExtensionArtifactSummary, ExtensionFile,
     ExtensionInstallBundle, ExtensionKind, ExtensionMcpManifest, ExtensionMcpTransport,
-    ExtensionSummary, ExtensionVersion, McpManifestError, HOOKS_MANIFEST_PATH,
+    ExtensionPolicy, ExtensionSummary, ExtensionVersion, McpManifestError, HOOKS_MANIFEST_PATH,
     HOOK_ROOT_PLACEHOLDER,
 };
 pub use identity::{
